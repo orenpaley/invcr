@@ -1,47 +1,29 @@
-Capstone II  
-###Project Proposal 1
+####Capstone II  
+###Lobster Invoice
 
-Project: AV Techs 
+Stack: React, Node, PostgreSQL
 
-Stack  
-Backend: Node.js  
-SQL: PostgreSQL
 
-Front End Web App: React
-
-Project Focus: Create a working API that allows admins, scope of work submitters, project managers,  and contractors to each have control and access to their domain in the api.  
-
-Admins: can add, delete, modify users, *jobs,  
-SOW Submitters: create and submit job proposals, review invoices, view contractors 
-
-Project Manager: Assemble crew lists,    
-Contractors: Accept jobs, check schedule/info, update profile, 
+Project Focus: front end focused web app that features a form tool that allows user to generate an invoice. Will also have a backend that will allow users to log in, save their invoices, save client information, upload a logo, and update the status of generated invoices. 
+ 
+ 
 
 ----
 
-Capstone II  
-###Project Proposal 2
+###Gamer Go
 
-Project: gamergo
+Stack: React, Node, PostgreSQL
 
-Stack  
-Backend: Node.js  
-SQL: PostgreSQL
-
-Front End Web App: React
 
 Project Focus: Create a working API that allows gamers to create a profile and join a team. Gamers will be able to add games, social preferences, preferred playing times and request other players to join their team or request to join a team. They will also have the option to request a players in game id. 
 
 ---- 
 
 Capstone II  
-###Project Proposal 3
+###Tasky
+Stack: React, Node, PostgreSQL
 
-Project: lobsterjob  
-Backend: Node.js  
-SQL: PostgreSQL  
-Front End Web App: React
-
-Project Focus: Create an account then add and store jobs to be referenced in the future. Organizational tool. 
+Project Focus: Create, save, and assign tasks with status, deadline, other team members, category and description. UI would be a major focus in this project but backend data flow would also be vital. 
 
 
+*
