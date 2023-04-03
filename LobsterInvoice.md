@@ -28,9 +28,9 @@ stretch goals?
 
 ## Lobster Invoice
 
-####stack: React, Node
+#### stack: React, Node
 #### focus: front end
-####output type: website
+#### output type: website
 
 #### Goal
 My goal is to create an accessible website for users to enter and instantly be able to generate, send and download an invoice. Additionally, I want that user to be able to create a login to save their invoices, update the status of an invoice, and save client data.
