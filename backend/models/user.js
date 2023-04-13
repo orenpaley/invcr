@@ -116,12 +116,13 @@ class User {
 
   static async findAll() {
     const result = await db.query(
-      `SELECT email,
+      `SELECT id, 
+              email,
               first_name AS "firstName",
               last_name AS "lastName",
               is_admin AS "isAdmin"
            FROM users
-           ORDER BY email`
+           `
     );
 
     return result.rows;
@@ -134,9 +135,11 @@ class User {
    * Throws NotFoundError if user not found.
    **/
 
-  static async get(email) {
+  static async get(userId) {
     const userRes = await db.query(
-      `SELECT email,
+      `SELECT 
+              id,
+              email,
               first_name AS "firstName",
               last_name AS "lastName",
               address,
@@ -144,13 +147,13 @@ class User {
               logo,
               is_admin AS "isAdmin"
            FROM users
-           WHERE email = $1`,
-      [email]
+           WHERE id = $1`,
+      [userId]
     );
 
     const user = userRes.rows[0];
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    if (!user) throw new NotFoundError(`No user: ${userId}`);
 
     return user;
   }
@@ -172,7 +175,7 @@ class User {
    * or a serious security risks are opened.
    */
 
-  static async update(email, data) {
+  static async update(userId, data) {
     if (data.password) {
       data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
     }
@@ -182,11 +185,11 @@ class User {
       lastName: "last_name",
       isAdmin: "is_admin",
     });
-    const emailIdx = "$" + (formattedSql.values.length + 1);
+    const userIdx = "$" + (formattedSql.values.length + 1);
 
     const querySql = `UPDATE users 
                       SET ${formattedSql.setCols} 
-                      WHERE email = ${emailIdx} 
+                      WHERE id = ${userIdx} 
                       RETURNING email,
                                 first_name AS "firstName",
                                 last_name AS "lastName",
@@ -194,10 +197,10 @@ class User {
                                 phone, 
                                 logo, 
                                 is_admin AS "isAdmin"`;
-    const result = await db.query(querySql, [...formattedSql.values, email]);
+    const result = await db.query(querySql, [...formattedSql.values, userId]);
     const user = result.rows[0];
 
-    if (!user) throw new NotFoundError(`No user: ${email}`);
+    if (!user) throw new NotFoundError(`No user: ${userId}`);
 
     delete user.password;
     return user;
@@ -205,13 +208,13 @@ class User {
 
   /** Delete given user from database; returns undefined. */
 
-  static async remove(email) {
+  static async remove(userId) {
     let result = await db.query(
       `DELETE
            FROM users
-           WHERE email = $1
-           RETURNING email`,
-      [email]
+           WHERE id = $1
+           RETURNING userId`,
+      [userId]
     );
     const user = result.rows[0];
 

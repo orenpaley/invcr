@@ -16,7 +16,7 @@ CREATE TABLE "clients" (
   "name" varchar(255),
   "address" varchar(800),
   "email" varchar(255),
-  "created_at" timestamp
+  "created_at" timestamp NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE "invoices" (
@@ -28,22 +28,26 @@ CREATE TABLE "invoices" (
   "first_name" varchar(255),
   "last_name" varchar(255),
   "address" varchar(800),
-  "logo" varchar(800),
+  "logo" varchar(800) NOT NULL DEFAULT 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
   "client_name" varchar(255),
   "client_address" varchar(800),
   "client_email" varchar(255),
-  "created_at" timestamp,
+  "created_at" timestamp NOT NULL DEFAULT NOW(),
+  "date" date NOT NULL,
+  "due_date" date,
+  "payment_terms" varchar(50),
   "submitted_at" timestamp,
   "terms" varchar(800),
   "notes" text,
-  "tax_rate" decimal,
-  "total" decimal,
+  "tax_rate" decimal DEFAULT 0,
+  "total" decimal DEFAULT 0,
   "currency" varchar(5),
   "status" varchar(50)
 );
 
 CREATE TABLE "items" (
   "id" serial PRIMARY KEY,
+  "user_id" integer, 
   "invoice_id" integer,
   "description" text,
   "rate" decimal,
@@ -57,3 +61,6 @@ ALTER TABLE "invoices" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "clients" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "items" ADD FOREIGN KEY ("invoice_id") REFERENCES "invoices" ("id");
+
+ALTER TABLE "items" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+

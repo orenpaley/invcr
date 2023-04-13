@@ -63,11 +63,11 @@ router.get("/", ensureAdmin, async function (req, res, next) {
  **/
 
 router.get(
-  "/:email",
+  "/:userId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      const user = await User.get(req.params.email);
+      const user = await User.get(req.params.userId);
       return res.json({ user });
     } catch (err) {
       return next(err);
