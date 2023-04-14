@@ -33,7 +33,7 @@ class LobsterApi {
   }
 
   // Individual API routes
-
+  // ******** LOGIN
   static async login(email, password) {
     let res = await this.request(
       `auth/token`,
@@ -48,61 +48,97 @@ class LobsterApi {
     console.log("log in successful");
     return res.token;
   }
-
-  static async register(email, password, firstName, lastName, email) {
+  // ******** REGISTER
+  static async register(
+    email,
+    password,
+    firstName,
+    lastName,
+    address,
+    logo,
+    isAdmin
+  ) {
     let res = await this.request(
       "auth/register",
       {
-        username: username,
+        email: email,
         password: password,
         firstName: firstName,
         lastName: lastName,
-        email: email,
+        address: address,
+        logo: logo,
       },
       "post"
     );
     return res.token;
   }
 
-  static async getUser(username) {
-    let res = await this.request(`users/${username}`);
+  static async getUser(userId) {
+    let res = await this.request(`users/${userId}`);
     return res.user;
   }
 
-  static async patchUser(username, data) {
-    let res = await this.request(`users/${username}`, data, "patch");
+  static async patchUser(userId, data) {
+    let res = await this.request(`users/${userId}`, data, "patch");
     console.log("user patched", res);
     return res;
   }
 
-  /** Get details on a company by handle. */
+  // ** Save New Invoice */
 
-  static async getCompany(handle) {
-    let res = await this.request(`companies/${handle}`);
-    return res.company;
+  static async saveInvoice(userId, data) {
+    let res = await this.request(`invoices/${userId}`, data, "post");
+    return res.invoice;
   }
 
-  /** Get list of companies */
-
-  static async getCompanies(filterer = null) {
-    let res = await this.request(`companies`);
-    return !filterer
-      ? res.companies
-      : res.companies.filter((c) => c.handle.includes(filterer));
+  // Modify existing Invoice
+  static async patchInvoice(userId, code, data) {
+    let res = await this.request(`invoices/${userId}/${code}`, data, "patch");
+    return res.invoice;
   }
 
-  /** Get details on a job */
+  /** Get Invoice. */
 
-  static async getJob(id) {
-    let res = await this.request(`jobs/${id}`);
-    return res.job;
+  static async getInvoice(userId, code) {
+    let res = await this.request(`invoices/${userId}/${code}`);
+    return res.invoice;
   }
 
-  /** Get list of jobs */
+  /** Get list of invoices */
 
-  static async getJobs() {
-    let res = await this.request(`jobs`);
-    return res.jobs;
+  static async getInvoices(userId) {
+    let res = await this.request(`invoices/${userId}`);
+    return res.invoices;
+  }
+
+  /** add new Client */
+  static async addClient(userId, data) {
+    let res = await this.request(`clients/${userId}`, data, "post");
+    return res.client;
+  }
+
+  /** Modify existing Client */
+  static async updateClient(userId, clientId, data) {
+    let res = await this.request(
+      `clients/${userId}/${clientId}`,
+      data,
+      "patch"
+    );
+    return res.client;
+  }
+
+  /** Get Client */
+
+  static async getClient(userId, clientId) {
+    let res = await this.request(`clients/${userId}/${clientId}`);
+    return res.client;
+  }
+
+  /** Get list of Clients */
+
+  static async getClients(userId) {
+    let res = await this.request(`clients/${userId}`);
+    return res.clients;
   }
 
   /** User Apply to Job **/
