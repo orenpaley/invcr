@@ -1,0 +1,98 @@
+.container-box {
+  font-size: 16px !important;
+  padding: 50px !important;
+  margin: 10px !important;
+  
+}
+
+.form-control {
+  font-size: 16px !important;
+  margin: 0;
+  border: 0 !important;
+  background-color: #FFE2E2 !important;
+}
+
+.form-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  
+}
+.heading {
+  margin: 0;
+  padding: 0;
+  padding-right: 24px;
+}
+.form-group { margin-bottom: .3rem; }
+h4 {
+  font-size: 14px;
+}
+
+.group {
+  margin-bottom: .35em;
+  border: 0;
+}
+
+input, Input, textarea {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0;
+  transition: transform 350ms !important;
+  max-width: fit-content;
+  
+
+}
+
+input:hover, Input:hover, textarea:hover {
+   padding: 4px !important; 
+  /* font-size: 16px !important; */
+  background-color: yellow !important; 
+  transform: scale(1.5) !important;
+  max-width: fit-content;
+}
+
+Input {
+  background-color: #FFE2E2;
+}
+
+label {
+  padding: 0;
+  margin: 0;
+  border: 0
+
+
+}
+
+.itemTable {
+  margin-top: 8px;
+}
+
+td {
+  border: 1px black solid !important;
+}
+
+.add {
+  font-size: 22px;
+  background-color: lightgreen;
+  text-align: center;
+  margin: 8px;
+  padding: 6px 16px;
+
+}
+
+.add:hover {
+  background-color: green !important;
+}
+
+
+.remove {
+  padding: 0;
+  background-color: red;
+  margin: 50% 5px;
+
+}
+
+.remove:hover {
+  background-color: darkred !important;
+}

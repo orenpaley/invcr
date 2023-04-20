@@ -1,12 +1,16 @@
-import logo from "./logo.svg";
 import "./App.css";
+import { BrowserRouter } from "react-router-dom";
+import Navigation from "./Components/Nav";
+import LobsterRoutes from "./Routes/Routes";
 
 function App() {
   return (
-    <div className="App">
-      <Nav />
-      <div>Hello World</div>
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <Navigation />
+        <LobsterRoutes />
+      </div>
+    </BrowserRouter>
   );
 }
 

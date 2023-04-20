@@ -1,0 +1,13 @@
+
+.nav {
+  padding: .5em 3em .5em ;
+  font-size: 22px;
+  gap: 22px;
+  background-color: #D9D9D9;
+  }
+
+  .form-control {
+    font-size: 12px !important;
+    margin: 0;
+    border: 1px;
+  }
