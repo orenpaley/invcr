@@ -25,6 +25,7 @@ class User {
     // try to find the user first
     const result = await db.query(
       `SELECT email,
+              id,
               password,
               first_name AS "firstName",
               last_name AS "lastName",

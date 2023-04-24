@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Navigate } from "react-router-dom";
-import userContext from "../UserContext";
+import userContext from "../userContext";
 
 /** "Higher-Order Component" for private routes.
  *

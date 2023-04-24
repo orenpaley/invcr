@@ -2,22 +2,21 @@ import LobsterApi from "../../API/api";
 // import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import { Button } from "reactstrap";
+import "./Login.css";
 
-function LoginForm() {
+function LoginForm({ handleChange, user, setUser }) {
   const history = useNavigate();
-  const handleChange = (e) => {
-    e.preventDefault();
-    console.log("key entered - ", e.target.value);
-  };
+  console.log("user in login form!", user);
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    const currentUser = await LobsterApi.login(
+    const loggedInUser = await LobsterApi.login(
       e.target.email.value,
       e.target.password.value
     );
-    localStorage.setItem("currUser", currentUser);
-    history.push("/");
-    history.go(0);
+    console.log("logged user login form", loggedInUser);
+    setUser(loggedInUser);
+    localStorage.setItem("curr", JSON.stringify(loggedInUser));
+    return;
   };
   return (
     <form

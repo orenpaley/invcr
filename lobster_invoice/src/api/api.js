@@ -20,7 +20,11 @@ class LobsterApi {
     //there are multiple ways to pass an authorization token, this is how you pass it in the header.
     //this has been provided to show you another way to pass the token. you are only expected to read this code for this project.
     const url = `${BASE_URL}/${endpoint}`;
-    const headers = { Authorization: `Bearer ${LobsterApi.token}` };
+    const headers = {
+      Authorization: `Bearer ${
+        LobsterApi.token || localStorage.getItem("token")
+      }`,
+    };
     const params = method === "get" ? data : {};
 
     try {
@@ -31,6 +35,8 @@ class LobsterApi {
       throw Array.isArray(message) ? message : [message];
     }
   }
+
+  static token;
 
   // Individual API routes
   // ******** LOGIN
@@ -45,8 +51,10 @@ class LobsterApi {
     );
     console.log("res", res);
     LobsterApi.token = res.token;
+    localStorage.setItem("token", res.token);
     console.log("log in successful");
-    return res.token;
+    console.log("user logged in", res.user);
+    return res.user;
   }
   // ******** REGISTER
   static async register(
@@ -108,6 +116,7 @@ class LobsterApi {
 
   static async getInvoices(userId) {
     let res = await this.request(`invoices/${userId}`);
+    console.log("res???", res.invoices);
     return res.invoices;
   }
 

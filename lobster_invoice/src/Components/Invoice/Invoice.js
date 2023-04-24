@@ -3,8 +3,11 @@ import React, { useEffect } from "react";
 import "./Invoice.css";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { initialValues, initialItem } from "./initialValues";
+import LobsterApi from "../../API/api";
+import userContext from "../../userContext";
+
 import {
   Container,
   Row,
@@ -21,15 +24,21 @@ const Invoice = () => {
   const [values, setValues] = useState(initialValues);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
+  const [user, setUser] = useContext(userContext);
 
   const handleChange = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
-    console.log(e.target.name, e.target.value);
     setValues({
       ...values,
       [name]: value,
     });
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    console.log("user id on save", user.id);
+    LobsterApi.saveInvoice(user.id, values);
   };
 
   const handleItemChange = (index, name, value) => {
@@ -45,7 +54,6 @@ const Invoice = () => {
     });
     // current.items[index] = { [name]: value };
     // return current;
-    console.log("updated items", items);
     setValues({ ...values, items });
   };
 
@@ -58,7 +66,6 @@ const Invoice = () => {
 
   const handleRemove = (i) => {
     const items = values.items.filter((item, index) => index !== i);
-
     setValues({ ...values, items });
   };
 
@@ -89,27 +96,37 @@ const Invoice = () => {
     setTotal(total.toFixed(2));
   }, [subtotal, values.taxRate]);
 
+  const getItems = () => {
+    let items = values.items;
+    let itemArr = [];
+    items.forEach((item) => {
+      let vals = Object.values(item);
+      itemArr.push([vals.map((v) => String(v))]);
+    });
+    return itemArr.flat();
+  };
+
   const generatePdf = () => {
     const doc = new jsPDF("p", "mm", "a4");
 
     // Add the information for the person sending the invoice
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text("John Doe", 20, 25);
+    doc.text(values.name, 20, 25);
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text("123 Main St", 20, 31);
-    doc.text("Anytown, USA 12345", 20, 36);
+    doc.text(values.address, 20, 31);
+    doc.text(values.cityStateZip, 20, 36);
 
     // Add the "Bill To" section
     doc.setFont(undefined, "bold");
     doc.text("Bill To:", 20, 55);
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text("Jane Smith", 20, 60);
+    doc.text(values.clientName, 20, 60);
     doc.setFont(undefined, "normal");
-    doc.text("456 Oak St", 20, 65);
-    doc.text("Anytown, USA 12345", 20, 70);
+    doc.text(values.clientAddress, 20, 65);
+    doc.text(values.clientCityStateZip, 20, 70);
 
     // Add Invoice Title / Info
     doc.setFontSize(28);
@@ -118,37 +135,34 @@ const Invoice = () => {
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
     doc.text("Invoice Number:", 110, 55);
-    doc.text("1234", 150, 55);
+    doc.text(values.invoiceCode, 150, 55);
 
     doc.text("Date:", 110, 63);
     doc.setFont(undefined, "normal");
-    doc.text("15 April 2023", 150, 63);
+    doc.text(values.date, 150, 63);
 
     doc.text("Due Date:", 110, 71);
     doc.setFont(undefined, "normal");
-    doc.text("15 May 2023", 150, 71);
+    doc.text(values.dueDate, 150, 71);
 
+    const items = getItems();
     autoTable(doc, {
       startY: 80,
-      head: [["Description", "Quantity", "Price", "Total"]],
-      body: [
-        ["Item 1", "1", "$10.00", "$10.00"],
-        ["Item 2", "2", "$20.00", "$40.00"],
-        ["Item 3", "3", "$30.00", "$90.00"],
-      ],
+      head: [["Description", "Rate", "Quantity", "Total"]],
+      body: items,
     });
     let finalY = doc.previousAutoTable.finalY;
 
     doc.setFont(undefined, "normal");
     doc.text("Subtotal:", 140, finalY + 10);
-    doc.text("$140.00", 170, finalY + 10);
+    doc.text(String(subtotal), 170, finalY + 10);
 
     doc.text("Tax:", 140, finalY + 20);
-    doc.text("$14.00", 170, finalY + 20);
+    doc.text(String(values.taxRate), 170, finalY + 20);
 
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
-    doc.text("$154.00", 170, finalY + 30);
+    doc.text(String(total), 170, finalY + 30);
 
     doc.save("invoice.pdf");
   };
@@ -157,10 +171,18 @@ const Invoice = () => {
       <div>
         <div
           style={{
-            width: "210mm",
+            width: "250mm",
+            margin: "auto",
+            display: "flex",
+            justifyContent: "space-evenly",
           }}
         >
-          <Button onClick={generatePdf}>Download</Button>{" "}
+          <Button className="btn btn-info downloadBtn" onClick={generatePdf}>
+            Download
+          </Button>
+          <Button className="btn btn-info saveBtn" onClick={handleSave}>
+            Save
+          </Button>
         </div>
       </div>
       <div
@@ -356,7 +378,6 @@ const Invoice = () => {
                 </thead>
                 <tbody>
                   {values.items.map((item, i) => {
-                    console.log("item where error is", item);
                     return (
                       <tr>
                         <td>

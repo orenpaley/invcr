@@ -1,0 +1,10 @@
+.login-page {
+  width: 210mm;
+  margin: auto;
+  padding: 35px;
+}
+
+
+form {
+  justify-content: space-around;
+}
