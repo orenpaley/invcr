@@ -126,7 +126,7 @@ const Invoice = ({ data }) => {
     // Add the information for the person sending the invoice
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text(values.name, 20, 25);
+    doc.text(values.firstName + " " + values.lastName, 20, 25);
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
     doc.text(values.address, 20, 31);
@@ -160,6 +160,12 @@ const Invoice = ({ data }) => {
     doc.text(values.dueDate, 150, 71);
 
     const items = getItems();
+    for (let item of items) {
+      console.log("what is in item?", item);
+      let itemTotal = +item[1] * +item[2];
+      item[3] = itemTotal;
+    }
+    console.log("items getting parsed to pdf", items);
     autoTable(doc, {
       startY: 80,
       head: [["Description", "Rate", "Quantity", "Total"]],
