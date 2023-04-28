@@ -20,8 +20,9 @@ import {
   FormText,
 } from "reactstrap";
 
-const Invoice = () => {
-  const [values, setValues] = useState(initialValues);
+const Invoice = ({ data }) => {
+  const [values, setValues] = useState(data || initialValues);
+  console.log("values of the invoice opened => ", values);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [user, setUser] = useContext(userContext);
@@ -38,7 +39,19 @@ const Invoice = () => {
   const handleSave = (e) => {
     e.preventDefault();
     console.log("user id on save", user.id);
-    LobsterApi.saveInvoice(user.id, values);
+    const invoiceCheck = async () => {
+      return (await LobsterApi.getInvoice(user.id, values.code)) || null;
+    };
+    const isInvoice = invoiceCheck();
+    const saveInvoice = async () => {
+      if (isInvoice) {
+        console.log("this is the invoice -> ", values);
+        await LobsterApi.patchInvoice(user.id, values.code, values);
+      } else {
+        LobsterApi.saveInvoice(user.id, values);
+      }
+    };
+    saveInvoice();
   };
 
   const handleItemChange = (index, name, value) => {
@@ -55,6 +68,7 @@ const Invoice = () => {
     // current.items[index] = { [name]: value };
     // return current;
     setValues({ ...values, items });
+    console.log("values on item change", values);
   };
 
   const getTotal = (quantity, rate) => {
@@ -79,8 +93,8 @@ const Invoice = () => {
     let subtotal = 0;
 
     values.items.forEach((item) => {
-      const quantNum = parseFloat(item.itemQuantity);
-      const rateNum = parseFloat(item.itemRate);
+      const quantNum = parseFloat(item.quantity);
+      const rateNum = parseFloat(item.rate);
       const amount = quantNum && rateNum ? quantNum * rateNum : 0;
 
       subtotal += amount;
@@ -135,7 +149,7 @@ const Invoice = () => {
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
     doc.text("Invoice Number:", 110, 55);
-    doc.text(values.invoiceCode, 150, 55);
+    doc.text(values.code, 150, 55);
 
     doc.text("Date:", 110, 63);
     doc.setFont(undefined, "normal");
@@ -169,18 +183,34 @@ const Invoice = () => {
   return (
     <>
       <div>
+        <h2
+          style={{
+            maxWidth: "100mm",
+            border: "3px solid black",
+            margin: "15px auto",
+            textAlign: "center",
+            padding: "15px",
+            fontSize: "44px",
+            fontWeight: "700",
+          }}
+        >
+          {values.code}
+        </h2>
         <div
           style={{
-            width: "250mm",
+            color: "white",
+            backgrounColor: "blue",
+            width: "280mm",
             margin: "auto",
             display: "flex",
-            justifyContent: "space-evenly",
+            justifyContent: "flex-start",
+            gap: "48px",
           }}
         >
           <Button className="btn btn-info downloadBtn" onClick={generatePdf}>
             Download
           </Button>
-          <Button className="btn btn-info saveBtn" onClick={handleSave}>
+          <Button className="btn btn-warning saveBtn" onClick={handleSave}>
             Save
           </Button>
         </div>
@@ -188,7 +218,7 @@ const Invoice = () => {
       <div
         style={{
           border: "1px solid black",
-          width: "210mm",
+          width: "280mm",
           height: "auto",
           margin: "auto",
           padding: "2px",
@@ -213,17 +243,32 @@ const Invoice = () => {
               <h4>Billing Details</h4>
               <Form>
                 <div className="group">
-                  <Label for="name" hidden>
-                    Name
+                  <Label for="firstName" hidden>
+                    First Name
                   </Label>
                   <Input
-                    id="name"
-                    name="name"
-                    placeholder="Name"
+                    id="firstName"
+                    name="firstName"
+                    placeholder="first name"
                     type="text"
-                    value={values.name}
+                    value={values.firstName}
                     onChange={handleChange}
+                    style={{ display: "inline", width: "110px" }}
                   />
+                  <span style={{ display: "inline !important" }}>
+                    <Label for="lastName" hidden>
+                      First Name
+                    </Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      placeholder="last name"
+                      type="text"
+                      value={values.lastName}
+                      onChange={handleChange}
+                      style={{ display: "inline", width: "110px" }}
+                    />
+                  </span>
                 </div>
                 <div className="group">
                   <Label for="address" hidden>
@@ -326,13 +371,15 @@ const Invoice = () => {
               <Form>
                 <div className="group" id="formBasicInvoiceNumber">
                   <strong>
-                    <Label for="invoiceCode">Invoice Number</Label>
+                    <Label for="code">
+                      Invoice Code (must be uniqe to save)
+                    </Label>
                   </strong>
                   <Input
-                    name="invoiceCode"
+                    name="code"
                     type="text"
                     placeholder="invoice code"
-                    value={values.invoiceCode}
+                    value={values.code}
                     onChange={handleChange}
                   />
                 </div>
@@ -384,39 +431,39 @@ const Invoice = () => {
                           <Input
                             type="textarea"
                             placeholder="Item 1 + description"
-                            name="itemName"
-                            value={item.itemName}
+                            name="description"
+                            value={item.description}
                             onChange={(value) =>
-                              handleItemChange(i, "itemName", value)
+                              handleItemChange(i, "description", value)
                             }
                           />
                         </td>
                         <td>
                           <Input
-                            type="text"
+                            type="number"
+                            pattern="[0-9]"
                             placeholder="quantity"
-                            name="itemQuantity"
-                            value={item.itemQuantity}
+                            name="quantity"
+                            value={Number(item.quantity)}
                             onChange={(value) =>
-                              handleItemChange(i, "itemQuantity", value)
+                              handleItemChange(i, "quantity", value)
                             }
                           />
                         </td>
                         <td>
                           <Input
-                            type="text"
+                            type="number"
+                            pattern="[0-9]"
                             placeholder="rate"
-                            name="itemRate"
-                            value={item.itemRate}
+                            name="rate"
+                            value={Number(item.rate)}
                             onChange={(value) =>
-                              handleItemChange(i, "itemRate", value)
+                              handleItemChange(i, "rate", value)
                             }
                           />
                         </td>
                         <td>
-                          <div>
-                            {getTotal(item.itemQuantity, item.itemRate)}
-                          </div>
+                          <div>{getTotal(+item.quantity, +item.rate)}</div>
                         </td>
                         <Button
                           className="remove"
@@ -432,7 +479,7 @@ const Invoice = () => {
                   })}
                   <div>
                     <p>
-                      <span className="anything">
+                      <span>
                         <Button
                           className="add"
                           style={{
@@ -472,7 +519,7 @@ const Invoice = () => {
               </div>
               <div className="group">
                 <strong>
-                  <Label for="date">Notes</Label>
+                  <Label for="notes">Notes</Label>
                 </strong>
                 <Input
                   id="notes"

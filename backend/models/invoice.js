@@ -1,5 +1,7 @@
 "use strict";
 
+const moment = require("moment");
+
 const db = require("../db");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 const {
@@ -7,6 +9,7 @@ const {
   BadRequestError,
   UnauthorizedError,
 } = require("../expressError");
+// const { default: LobsterApi } = require("../../lobster_invoice/src/API/api");
 
 class Invoice {
   static async save(
@@ -18,12 +21,15 @@ class Invoice {
       firstName,
       lastName,
       address,
+      cityStateZip,
       logo = "https://www.pixfiniti.com/wp-content/uploads/2020/06/small_house_logo_template_3.png",
       clientName,
       clientAddress,
+      clientCityStateZip,
       clientEmail,
       date,
       dueDate,
+      items,
       paymentTerms,
       submittedAt,
       terms,
@@ -67,9 +73,11 @@ class Invoice {
           first_name,
           last_name,
           address, 
+          city_state_zip,
           logo, 
           client_name,
           client_address, 
+          client_city_state_zip,
           client_email, 
           date, 
           due_date,
@@ -83,7 +91,8 @@ class Invoice {
           status)
         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
         RETURNING user_id AS "userId", client_id AS "clientId", code, email, first_name AS "firstName",
-        last_name AS "lastName", address,logo, client_name AS "clientName", client_address AS "clientAddress", 
+        last_name AS "lastName", address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
+        client_city_state_zip AS "clientCityStateZip",
         client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "paymentTerms", 
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", total, currency, status`,
 
@@ -95,9 +104,11 @@ class Invoice {
         firstName,
         lastName,
         address,
+        cityStateZip,
         logo,
         clientName,
         clientAddress,
+        clientCityStateZip,
         clientEmail,
         date,
         dueDate,
@@ -113,6 +124,9 @@ class Invoice {
     );
     const invoice = result.rows[0];
 
+    const addedItems = LobsterApi.addItems(items, userId, id);
+    invoice.items = addedItems;
+
     return invoice;
   }
 
@@ -127,8 +141,8 @@ class Invoice {
     const invoiceRes = await db.query(
       `SELECT id, user_id AS "userId", client_id AS "clientId", code,
               email, first_name AS "firstName", last_name AS "lastName",
-              address, logo, client_name AS "clientName", client_address AS "clientAddress", 
-              client_email AS "clientEmail", created_at AS "createdAt", date, 
+              address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
+              client_city_state_zip AS "clientCityStateZip", client_email AS "clientEmail", created_at AS "createdAt", date, 
               due_date as "dueDate", payment_terms AS "paymentTerms", submitted_at AS "submittedAt", 
               terms, notes, tax_rate AS "taxRate", total, currency, status
               FROM invoices
@@ -137,12 +151,19 @@ class Invoice {
     );
 
     const invoice = invoiceRes.rows[0];
-    const itemQuery = `SELECT user_id AS "userId", invoice_id AS "invoiceId",
+
+    const itemQuery = `SELECT index,  user_id AS "userId", invoice_id AS "invoiceId",
                               description, rate, quantity
                         FROM items
-                        WHERE user_id = $1 AND invoice_id = $2`;
+                        WHERE user_id = $1 AND invoice_id = $2;`;
     const items = await db.query(itemQuery, [userId, invoice.id]);
+    console.log("items? -> ", items.rows);
     invoice.items = items.rows || [];
+    console.log("invoice on open --> ", invoice);
+    console.log("invoice date", moment(invoice.date).format("YYYY-MM-DD"));
+
+    invoice.date = moment(invoice.date).format("YYYY-MM-DD");
+    invoice.dueDate = moment(invoice.dueDate).format("YYYY-MM-DD");
 
     if (!invoice) throw new NotFoundError(`No invoice for user found: ${code}`);
 
@@ -208,12 +229,20 @@ class Invoice {
    **/
 
   static async update(userId, code, data) {
+    const currItems = data.items;
+    console.log("data data data", data);
+    delete data.items;
+    console.log("data wo items to be updated", data);
+    console.log("curr items, ", currItems);
     const formattedSql = sqlForPartialUpdate(data, {
+      userId: "user_id",
       clientId: "client_id",
       firstName: "first_name",
       lastName: "last_name",
+      cityStateZip: "city_state_zip",
       clientName: "client_name",
       clientAddress: "client_address",
+      clientCityStateZip: "client_city_state_zip",
       clientEmail: "client_email",
       createdAt: "created_at",
       dueDate: "due_date",
@@ -227,38 +256,100 @@ class Invoice {
     const querySql = `UPDATE invoices
                       SET ${formattedSql.setCols} 
                       WHERE user_id = ${userIdx} AND code = ${codeIdx}
-                      RETURNING code, first_name AS "firstName", last_name AS "lastName", address, client_name AS "clientName",
-                  client_email as "clientEmail", created_at as "createdAt"`;
+                      RETURNING code, first_name AS "firstName", last_name AS "lastName", address, city_state_zip AS "cityStateZip", 
+                      client_name AS "clientName", client_address AS "clientAddress", client_city_state_zip AS "clientCityStateZip",
+                      client_email as "clientEmail", created_at as "createdAt", date, due_date AS "dueDate"`;
     const result = await db.query(querySql, [
       ...formattedSql.values,
       +userId,
       code,
     ]);
     const invoice = result.rows[0];
+    console.log("invoice data pre item processing ->", invoice);
 
     if (!invoice) throw new NotFoundError(`No user: ${userId}`);
 
+    const newItems = [];
+    if (currItems) {
+      console.log("CURR ITEMS CURR ITEMS", currItems);
+      let indexCount = 0;
+      for (let item of currItems) {
+        console.log("i am item", item);
+        if (currItems.filter((item) => +item.index === indexCount + 1)) {
+          const itemQuery = `UPDATE items
+          SET description = $1, rate = $2, quantity = $3
+          WHERE index = $4 AND user_id = $5 AND invoice_id = $6
+          RETURNING index, user_id AS "userId", invoice_id AS "invoiceId", description, rate, quantity`;
+          const itemRes = await db.query(itemQuery, [
+            item.description,
+            +item.rate,
+            +item.quantity,
+            item.index,
+            +userId,
+            +data.id,
+          ]);
+          newItems.push(itemRes.rows[0]);
+          indexCount++;
+        } else {
+          const itemQuery = `INSERT INTO items
+                             (index, description, rate, quantity)
+                              WHERE user_id = ${invoice.userId} AND invoice_id = ${invoice.id}
+                              VALUES($1,$2,$3,$4)
+                                `;
+          const itemRes = await db.query(itemQuery, [
+            indexCount,
+            item.description,
+            +item.rate,
+            +item.quantity,
+          ]);
+          newItems.push(itemRes.rows[0]);
+          indexCount++;
+        }
+      }
+      console.log("new items??? -> ", newItems);
+      if (newItems.length < currItems.length) {
+        await db.query(
+          `DELETE FROM items WHERE index > ${indexCount + 1} AND user_id = ${
+            invoice.userId
+          } AND invoice_id = ${invoice.id}`
+        );
+      }
+      console.log("do we stilll have items in the backend? => ", newItems);
+    }
+    invoice.items = newItems || [];
+    // filteredInv = invoice.filter((row) => row != "items");
+    // console.log("returning invoice without items? -> ", filteredInv);
     return invoice;
   }
 
-  static async addItem(invoiceId, description, rate, quantity) {
-    const itemQuery = `INSERT INTO items (invoice_id, description, rate, quantity)
-                        VALUES ($1,$2,$3,$4)
-                        RETURNING invoice_id AS "invoiceId", description, rate, quantity`;
-    const result = await db.query(itemQuery, [
-      invoiceId,
-      description,
-      rate,
-      quantity,
-    ]);
-    const item = result.rows[0];
-    return item;
+  static async addItems(items, userId, invoiceId) {
+    if (items) {
+      const newItems = [];
+      for (let item in items) {
+        let indexCount = 0;
+        const itemQuery = `INSERT INTO items (index, user_id, invoice_id, description, rate, quantity)
+                            VALUES ($1,$2,$3,$4,$5,%6)
+                            RETURNING index, user_id AS "userId", invoice_id AS "invoiceId", description, rate, quantity`;
+        const itemRes = await db.query(itemQuery, [
+          indexCount + 1,
+          +userId,
+          +data.invoiceId,
+          item.description,
+          +item.rate,
+          +item.quantity,
+        ]);
+        newItems.push(itemRes.rows[0]);
+        indexCount++;
+      }
+      return newItems;
+    }
+    return [];
   }
 
-  static async deleteItem(id) {
-    await db.query(`DELETE FROM items WHERE id = $1`, [id]);
-    return `deleted item`;
-  }
+  // static async deleteItem(id) {
+  //   await db.query(`DELETE FROM items WHERE id = $1`, [id]);
+  //   return `deleted item`;
+  // }
 
   static async getItems(userId, invoiceId) {
     const itemQuery = `SELECT (user_id AS "userId", invoice_id AS "invoiceId",
@@ -267,8 +358,18 @@ class Invoice {
                         Where user_id = $1 AND invoice_id = $2`;
 
     const result = await db.query(itemQuery, [userId, invoiceId]);
-    const items = result.rows;
-    return items;
+    const itemsRes = result.rows;
+    return itemsRes;
+  }
+  static async patchItems(userId, invoiceId, items) {
+    const itemQuery = `SELECT (user_id AS "userId", invoice_id AS "invoiceId",
+                              description, rate, quantity)
+                        FROM items
+                        Where user_id = $1 AND invoice_id = $2`;
+
+    const result = await db.query(itemQuery, [userId, invoiceId]);
+    const itemsRes = result.rows;
+    return itemsRes;
   }
 }
 

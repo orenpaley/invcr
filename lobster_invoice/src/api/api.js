@@ -102,6 +102,7 @@ class LobsterApi {
   // Modify existing Invoice
   static async patchInvoice(userId, code, data) {
     let res = await this.request(`invoices/${userId}/${code}`, data, "patch");
+
     return res.invoice;
   }
 
@@ -151,21 +152,21 @@ class LobsterApi {
   }
 
   /** User Apply to Job **/
-  static async applyJob(username, jobId) {
-    let res = await this.request(`users/${username}/jobs/${jobId}`, {}, "post");
-    console.log(`${username} applied to job {${jobId}}`, res);
-    return res;
-  }
+  // static async getItems(userId, invoiceId) {
+  //   let res = await this.request(`users/${userId}/jobs/${jobId}`);
+  //   console.log(`${username} applied to job {${jobId}}`, res);
+  //   return res;
+  // }
   /** User Un Apply to Job **/
-  static async unApplyJob(username, jobId) {
-    let res = await this.request(
-      `users/${username}/jobs/${jobId}`,
-      {},
-      "delete"
-    );
-    console.log(`${username} removed application {${jobId}}`, res);
-    return res;
-  }
+  // static async unApplyJob(username, jobId) {
+  //   let res = await this.request(
+  //     `users/${username}/jobs/${jobId}`,
+  //     {},
+  //     "delete"
+  //   );
+  //   console.log(`${username} removed application {${jobId}}`, res);
+  //   return res;
+  // }
 }
 
 // for now, put token ("testuser" / "password" on class)

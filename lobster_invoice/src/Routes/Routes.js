@@ -7,6 +7,7 @@ import Home from "../Components/Home";
 import Signup from "../Components/auth/Signup";
 import Login from "../Components/auth/Login";
 import Invoices from "../Components/Invoices/Invoices";
+import Clients from "../Components/Clients/Clients";
 
 function LobsterRoutes({ user }) {
   return (
@@ -16,6 +17,7 @@ function LobsterRoutes({ user }) {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/invoices" element={<Invoices />} />
+        <Route path="/clients" element={<Clients />} />
       </Routes>
     </div>
   );
