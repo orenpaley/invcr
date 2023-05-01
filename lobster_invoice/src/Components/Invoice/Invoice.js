@@ -33,22 +33,30 @@ const Invoice = ({ data }) => {
     setValues({
       ...values,
       [name]: value,
+      total: total,
     });
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     console.log("user id on save", user.id);
     const invoiceCheck = async () => {
-      return (await LobsterApi.getInvoice(user.id, values.code)) || null;
+      let isSaved = null;
+      try {
+        isSaved = await LobsterApi.getInvoice(user.id, values.code);
+      } catch (e) {
+        isSaved = null;
+      }
+      return isSaved;
     };
-    const isInvoice = invoiceCheck();
+    const isInvoice = await invoiceCheck();
+    console.log("is invoice======= ", isInvoice);
     const saveInvoice = async () => {
       if (isInvoice) {
-        console.log("this is the invoice -> ", values);
+        console.log("this is the invoice -> ", isInvoice);
         await LobsterApi.patchInvoice(user.id, values.code, values);
       } else {
-        LobsterApi.saveInvoice(user.id, values);
+        await LobsterApi.saveInvoice(user.id, values);
       }
     };
     saveInvoice();
@@ -60,6 +68,7 @@ const Invoice = ({ data }) => {
     const items = values.items.map((item, i) => {
       if (i === index) {
         const newItem = { ...item };
+        setSubtotal(subtotal + newItem.rate * newItem.quantity);
         newItem[value.target.name] = value.target.value;
         return newItem;
       }
@@ -84,20 +93,28 @@ const Invoice = ({ data }) => {
   };
 
   const handleAdd = () => {
-    const items = [...values.items, { ...initialItem }];
+    const items = [
+      ...values.items,
+      {
+        ...initialItem,
+        index: values.items.length + 1,
+        userId: values.userId,
+        invoiceId: values.id,
+      },
+    ];
 
     setValues({ ...values, items });
   };
 
   useEffect(() => {
-    let subtotal = 0;
+    setSubtotal(0);
 
     values.items.forEach((item) => {
       const quantNum = parseFloat(item.quantity);
       const rateNum = parseFloat(item.rate);
       const amount = quantNum && rateNum ? quantNum * rateNum : 0;
 
-      subtotal += amount;
+      setSubtotal(subtotal + amount);
     });
 
     setSubtotal(subtotal);
@@ -108,6 +125,7 @@ const Invoice = ({ data }) => {
 
     total = subtotal * values.taxRate + subtotal;
     setTotal(total.toFixed(2));
+    values.total = total;
   }, [subtotal, values.taxRate]);
 
   const getItems = () => {
@@ -161,6 +179,7 @@ const Invoice = ({ data }) => {
 
     const items = getItems();
     for (let item of items) {
+      item.splice(0, 3);
       console.log("what is in item?", item);
       let itemTotal = +item[1] * +item[2];
       item[3] = itemTotal;
@@ -183,6 +202,12 @@ const Invoice = ({ data }) => {
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
     doc.text(String(total), 170, finalY + 30);
+
+    doc.text("Terms:", 20, finalY + 10);
+    doc.text(String(values.terms), 20, finalY + 20);
+
+    doc.text("Notes:", 20, finalY + 40);
+    doc.text(String(values.notes), 20, finalY + 50);
 
     doc.save("invoice.pdf");
   };
@@ -400,6 +425,7 @@ const Invoice = ({ data }) => {
                     type="date"
                     value={values.date}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="group">
@@ -413,6 +439,7 @@ const Invoice = ({ data }) => {
                     type="date"
                     value={values.dueDate}
                     onChange={handleChange}
+                    required
                   />
                 </div>
               </Form>
@@ -560,7 +587,9 @@ const Invoice = ({ data }) => {
               </div>
               <div className="group">
                 <strong>
-                  <Label for="total">Total</Label>
+                  <Label for="total" value={values.total}>
+                    Total
+                  </Label>
                 </strong>
                 <div>{total}</div>
               </div>

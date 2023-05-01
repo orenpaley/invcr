@@ -13,19 +13,25 @@ export const initialValues = {
   dueDate: "2023-02-01",
   items: [
     {
+      index: 1,
+      userId: 1,
+      invoiceId: 1,
       description: "item 1 + description",
       rate: 35,
       quantity: 8,
       get itemTotal() {
-        return this.itemRate * this.itemQuantity;
+        return this.rate * this.quantity;
       },
     },
     {
+      index: 2,
+      userId: 1,
+      invoiceId: 1,
       description: "item 2 + description",
       rate: 50,
       quantity: 4,
       get itemTotal() {
-        return this.itemRate * this.itemQuantity;
+        return this.rate * this.quantity;
       },
     },
   ],

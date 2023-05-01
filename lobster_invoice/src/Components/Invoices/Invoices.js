@@ -1,3 +1,12 @@
+import React from "react";
+import {
+  Table,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from "reactstrap";
+
 import { useState, useContext } from "react";
 import { useEffect } from "react";
 import LobsterApi from "../../API/api";
@@ -30,8 +39,89 @@ const Invoices = () => {
     console.log("opening invoice with data! ->", data);
     navigate("/", { state: data });
   };
+
+  const [statuses, setStatuses] = useState([]);
+
+  const options = [
+    {
+      label: "created",
+      value: "created",
+    },
+
+    {
+      label: "paid",
+      value: "paid",
+    },
+
+    {
+      label: "sent",
+      value: "sent",
+    },
+
+    {
+      label: "overdue",
+      value: "overdue",
+    },
+  ];
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    console.log("name", e.target.name);
+    console.log("e.target.value", e.target.value);
+
+    const { name, value } = e.target;
+    const patch = async () => {
+      setStatuses({ ...statuses, [name]: value });
+      console.log("statuses", statuses);
+      await LobsterApi.patchInvoice(user.id, name, { status: value });
+      console.log(`status updated ${name} -> ${value}`);
+    };
+    patch();
+
+    // const res = LobsterApi.patchInvoice(user.id, invoice.code, {
+    //   status: status,
+    // });
+  };
+
   return (
-    <div>
+    <Table>
+      <thead>
+        <tr>
+          <th>Invoice Code</th>
+          <th>Client Name</th>
+          <th>status</th>
+          <th>Date</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {invoices.map((invoice) => (
+          <tr key={invoice.code}>
+            <th
+              data-code={invoice.code}
+              onClick={handleOpenInvoice}
+              scope="row"
+            >
+              {invoice.code}
+            </th>
+            <td>{invoice.clientName}</td>
+            <td>
+              <select
+                caret
+                name={invoice.code}
+                value={statuses[invoice.code] || invoice.status}
+                onChange={handleClick}
+              >
+                {options.map((option) => (
+                  <option value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </td>
+            <td>{invoice.dueDate}</td>
+            <td>{invoice.total}</td>
+          </tr>
+        ))}
+        {/* <div>
       {invoices.map((i, index) => (
         <div key={index} style={{ backgroundColor: "pink", margin: "10px" }}>
           <div>Client: {i.clientName}</div>
@@ -42,7 +132,9 @@ const Invoices = () => {
           <div>Due Date: {i.dueDate}</div>
         </div>
       ))}
-    </div>
+    </div> */}
+      </tbody>
+    </Table>
   );
 };
 

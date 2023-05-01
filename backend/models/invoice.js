@@ -30,7 +30,6 @@ class Invoice {
       date,
       dueDate,
       items,
-      paymentTerms,
       submittedAt,
       terms,
       notes,
@@ -51,19 +50,6 @@ class Invoice {
       throw new BadRequestError(`Duplicate invoice code: ${code}`);
     }
 
-    if (clientId) {
-      const clientQuery = await db.query(
-        `SELECT name, address, email
-                            FROM clients
-                            WHERE id = $1 AND user_id = $2`,
-        [clientId, +userId]
-      );
-      const client = clientQuery.rows[0];
-      if (client.name) clientName = client.name;
-      if (client.address) clientAddress = client.address;
-      if (client.email) clientEmail = client.email;
-    }
-
     let result = await db.query(
       `insert INTO invoices
         (user_id,
@@ -81,7 +67,6 @@ class Invoice {
           client_email, 
           date, 
           due_date,
-          payment_terms, 
           submitted_at, 
           terms, 
           notes, 
@@ -89,11 +74,11 @@ class Invoice {
           total, 
           currency, 
           status)
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
         RETURNING user_id AS "userId", client_id AS "clientId", code, email, first_name AS "firstName",
         last_name AS "lastName", address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
         client_city_state_zip AS "clientCityStateZip",
-        client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "paymentTerms", 
+        client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "Input", 
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", total, currency, status`,
 
       [
@@ -112,7 +97,6 @@ class Invoice {
         clientEmail,
         date,
         dueDate,
-        paymentTerms,
         submittedAt,
         terms,
         notes,
@@ -124,8 +108,25 @@ class Invoice {
     );
     const invoice = result.rows[0];
 
-    const addedItems = LobsterApi.addItems(items, userId, id);
-    invoice.items = addedItems;
+    const newItems = [];
+    for (let item of items) {
+      const itemQuery = `INSERT INTO items
+    (userId, invoiceId, index, description, rate, quantity)
+     VALUES($1,$2,$3,$4,$5,$6)
+       `;
+      const itemRes = await db.query(itemQuery, [
+        +userId,
+        id,
+        indexCount,
+        item.description,
+        +item.rate,
+        +item.quantity,
+      ]);
+      newItems.push(itemRes.rows[0]);
+      indexCount++;
+    }
+
+    invoice.items = newItems;
 
     return invoice;
   }
@@ -143,7 +144,7 @@ class Invoice {
               email, first_name AS "firstName", last_name AS "lastName",
               address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
               client_city_state_zip AS "clientCityStateZip", client_email AS "clientEmail", created_at AS "createdAt", date, 
-              due_date as "dueDate", payment_terms AS "paymentTerms", submitted_at AS "submittedAt", 
+              due_date as "dueDate", submitted_at AS "submittedAt", 
               terms, notes, tax_rate AS "taxRate", total, currency, status
               FROM invoices
       WHERE user_id = $1 AND code = $2`,
@@ -246,19 +247,49 @@ class Invoice {
       clientEmail: "client_email",
       createdAt: "created_at",
       dueDate: "due_date",
-      paymentTerms: "payment_terms",
       submittedAt: "submitted_at",
       taxRate: "tax_rate",
     });
     const userIdx = "$" + (formattedSql.values.length + 1);
     const codeIdx = "$" + (formattedSql.values.length + 2);
 
+    console.log("deleting....");
+
+    await db.query(`DELETE from items WHERE invoice_id = $1 AND user_id = $2`, [
+      invoice.id,
+      invoice.userId,
+    ]);
+    console.log("did we delete?");
+
+    if (currItems) {
+      console.log("CURR ITEMS CURR ITEMS", currItems);
+      let indexCount = 1;
+      for (let item of currItems) {
+        console.log("i am item", item);
+        total += +item.rate * +item.quantity;
+        {
+          const itemQuery = `INSERT INTO items
+                             (user_id, invoice_id, index, description, rate, quantity)
+                              VALUES($1,$2,$3,$4,$5,$6)`;
+          await db.query(itemQuery, [
+            +invoice.userId,
+            +invoice.id,
+            +indexCount,
+            item.description,
+            +item.rate,
+            +item.quantity,
+          ]);
+          indexCount++;
+        }
+      }
+    }
+
     const querySql = `UPDATE invoices
                       SET ${formattedSql.setCols} 
                       WHERE user_id = ${userIdx} AND code = ${codeIdx}
-                      RETURNING code, first_name AS "firstName", last_name AS "lastName", address, city_state_zip AS "cityStateZip", 
+                      RETURNING id, user_id AS "userId", code, first_name AS "firstName", last_name AS "lastName", address, city_state_zip AS "cityStateZip", 
                       client_name AS "clientName", client_address AS "clientAddress", client_city_state_zip AS "clientCityStateZip",
-                      client_email as "clientEmail", created_at as "createdAt", date, due_date AS "dueDate"`;
+                      client_email as "clientEmail", created_at as "createdAt", date, due_date AS "dueDate", status, total`;
     const result = await db.query(querySql, [
       ...formattedSql.values,
       +userId,
@@ -269,54 +300,7 @@ class Invoice {
 
     if (!invoice) throw new NotFoundError(`No user: ${userId}`);
 
-    const newItems = [];
-    if (currItems) {
-      console.log("CURR ITEMS CURR ITEMS", currItems);
-      let indexCount = 0;
-      for (let item of currItems) {
-        console.log("i am item", item);
-        if (currItems.filter((item) => +item.index === indexCount + 1)) {
-          const itemQuery = `UPDATE items
-          SET description = $1, rate = $2, quantity = $3
-          WHERE index = $4 AND user_id = $5 AND invoice_id = $6
-          RETURNING index, user_id AS "userId", invoice_id AS "invoiceId", description, rate, quantity`;
-          const itemRes = await db.query(itemQuery, [
-            item.description,
-            +item.rate,
-            +item.quantity,
-            item.index,
-            +userId,
-            +data.id,
-          ]);
-          newItems.push(itemRes.rows[0]);
-          indexCount++;
-        } else {
-          const itemQuery = `INSERT INTO items
-                             (index, description, rate, quantity)
-                              WHERE user_id = ${invoice.userId} AND invoice_id = ${invoice.id}
-                              VALUES($1,$2,$3,$4)
-                                `;
-          const itemRes = await db.query(itemQuery, [
-            indexCount,
-            item.description,
-            +item.rate,
-            +item.quantity,
-          ]);
-          newItems.push(itemRes.rows[0]);
-          indexCount++;
-        }
-      }
-      console.log("new items??? -> ", newItems);
-      if (newItems.length < currItems.length) {
-        await db.query(
-          `DELETE FROM items WHERE index > ${indexCount + 1} AND user_id = ${
-            invoice.userId
-          } AND invoice_id = ${invoice.id}`
-        );
-      }
-      console.log("do we stilll have items in the backend? => ", newItems);
-    }
-    invoice.items = newItems || [];
+    invoice.items = currItems || [];
     // filteredInv = invoice.filter((row) => row != "items");
     // console.log("returning invoice without items? -> ", filteredInv);
     return invoice;

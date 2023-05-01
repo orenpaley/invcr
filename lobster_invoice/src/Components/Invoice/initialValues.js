@@ -35,7 +35,7 @@ export const initialValues = {
 };
 
 export const initialItem = {
-  name: "",
+  description: "",
   quantity: "Qty",
   rate: "Rate",
 };
