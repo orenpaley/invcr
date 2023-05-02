@@ -23,9 +23,31 @@ import {
 const Invoice = ({ data }) => {
   const [values, setValues] = useState(data || initialValues);
   console.log("values of the invoice opened => ", values);
+  console.log("values total => ", values.total);
   const [subtotal, setSubtotal] = useState(0);
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(null);
   const [user, setUser] = useContext(userContext);
+
+  console.log("new total ", total);
+
+  useEffect(() => {
+    let itemsTotal = 0;
+    values.items.forEach((item) => {
+      const quantNum = parseFloat(item.quantity);
+      const rateNum = parseFloat(item.rate);
+      const amount = quantNum && rateNum ? quantNum * rateNum : 0;
+      itemsTotal += amount;
+      console.log("subtotal", subtotal);
+    });
+    setSubtotal(itemsTotal);
+  }, [data, values]);
+
+  useEffect(() => {
+    let newTotal = subtotal * +values.taxRate + subtotal;
+    setTotal(newTotal.toFixed(2));
+    values.total = newTotal;
+    console.log("total useeffect", total, subtotal, newTotal);
+  }, [subtotal]);
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -105,28 +127,6 @@ const Invoice = ({ data }) => {
 
     setValues({ ...values, items });
   };
-
-  useEffect(() => {
-    setSubtotal(0);
-
-    values.items.forEach((item) => {
-      const quantNum = parseFloat(item.quantity);
-      const rateNum = parseFloat(item.rate);
-      const amount = quantNum && rateNum ? quantNum * rateNum : 0;
-
-      setSubtotal(subtotal + amount);
-    });
-
-    setSubtotal(subtotal);
-  }, [values.items]);
-
-  useEffect(() => {
-    let total = 0;
-
-    total = subtotal * values.taxRate + subtotal;
-    setTotal(total.toFixed(2));
-    values.total = total;
-  }, [subtotal, values.taxRate]);
 
   const getItems = () => {
     let items = values.items;

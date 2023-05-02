@@ -7,18 +7,19 @@ const {
 } = require("../expressError");
 
 class Client {
-  static async save(userId, { name, address, email }) {
+  static async save(userId, data) {
     const userCheck = await db.query(`select id FROM users WHERE id = $1`, [
       +userId,
     ]);
     if (!userCheck.rows[0]) {
       throw NotFoundError(`user not found - id:${id}`);
     }
+    console.log("client data ---> ", data);
     const clientQuery = await db.query(
       `INSERT INTO clients (user_id, name, address, email)
           VALUES($1,$2,$3,$4)
-          RETURNING (name)`,
-      [+userId, name, address, email]
+          RETURNING (name, address, email, created_at)`,
+      [+userId, data.name, data.address, data.email]
     );
     return clientQuery.rows[0];
   }
@@ -32,13 +33,12 @@ class Client {
     }
 
     const clientsQuery = await db.query(
-      `SELECT id, name, address, email FROM clients
+      `SELECT id, name, address, email, created_at AS "createdAt" FROM clients
         WHERE user_id = $1`,
       [+userId]
     );
     console.log("clientsQuery --->", clientsQuery.rows);
     for (let client of clientsQuery.rows) {
-      console.log("client ---> ", client.id);
       const totalQuery = await db.query(
         `SELECT total 
            FROM invoices

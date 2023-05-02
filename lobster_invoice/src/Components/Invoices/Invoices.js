@@ -1,21 +1,16 @@
 import React from "react";
-import {
-  Table,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from "reactstrap";
+import { Table, Button } from "reactstrap";
 
 import { useState, useContext } from "react";
 import { useEffect } from "react";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 
 const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
+  const [clients, setClients] = useState([]);
   const [user, setUser] = useContext(
     userContext || JSON.parse(localStorage.getItem("curr"))
   );
@@ -24,7 +19,11 @@ const Invoices = () => {
     const fetchInvoices = async () => {
       setInvoices(await LobsterApi.getInvoices(user.id));
     };
+    const fetchClients = async () => {
+      setClients(await LobsterApi.getClients(user.id));
+    };
     fetchInvoices();
+    fetchClients();
   }, [user]);
 
   const handleOpenInvoice = async (e) => {
@@ -83,6 +82,11 @@ const Invoices = () => {
     // });
   };
 
+  const handleDelete = (e) => {
+    e.preventDefault();
+    LobsterApi.deleteInvoice(user.id, e.target.value);
+    console.log("deleted invoice -", e.target.value);
+  };
   return (
     <Table>
       <thead>
@@ -119,6 +123,9 @@ const Invoices = () => {
             </td>
             <td>{invoice.dueDate}</td>
             <td>{invoice.total}</td>
+            <Button onClick={handleDelete} value={invoice.code}>
+              X
+            </Button>
           </tr>
         ))}
         {/* <div>

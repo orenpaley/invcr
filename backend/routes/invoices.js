@@ -132,8 +132,8 @@ router.delete(
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      await Invoice.remove(req.params.userId);
-      return res.json({ deleted: req.params.userId });
+      await Invoice.remove(req.params.userId, req.params.code);
+      return res.json({ deleted: req.params.userId + "-" + req.params.code });
     } catch (err) {
       return next(err);
     }

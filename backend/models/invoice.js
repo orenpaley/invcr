@@ -231,10 +231,9 @@ class Invoice {
 
   static async update(userId, code, data) {
     const currItems = data.items;
-    console.log("data data data", data);
+
     delete data.items;
-    console.log("data wo items to be updated", data);
-    console.log("curr items, ", currItems);
+
     const formattedSql = sqlForPartialUpdate(data, {
       userId: "user_id",
       clientId: "client_id",
@@ -256,8 +255,8 @@ class Invoice {
     console.log("deleting....");
 
     await db.query(`DELETE from items WHERE invoice_id = $1 AND user_id = $2`, [
-      invoice.id,
-      invoice.userId,
+      data.id,
+      data.userId,
     ]);
     console.log("did we delete?");
 
@@ -266,21 +265,18 @@ class Invoice {
       let indexCount = 1;
       for (let item of currItems) {
         console.log("i am item", item);
-        total += +item.rate * +item.quantity;
-        {
-          const itemQuery = `INSERT INTO items
+        const itemQuery = `INSERT INTO items
                              (user_id, invoice_id, index, description, rate, quantity)
                               VALUES($1,$2,$3,$4,$5,$6)`;
-          await db.query(itemQuery, [
-            +invoice.userId,
-            +invoice.id,
-            +indexCount,
-            item.description,
-            +item.rate,
-            +item.quantity,
-          ]);
-          indexCount++;
-        }
+        await db.query(itemQuery, [
+          +data.userId,
+          +data.id,
+          +indexCount,
+          item.description,
+          +item.rate,
+          +item.quantity,
+        ]);
+        indexCount++;
       }
     }
 
@@ -306,6 +302,15 @@ class Invoice {
     return invoice;
   }
 
+  static async remove(userId, invoiceCode) {
+    if (userId && invoiceCode) {
+      await db.query(`DELETE from invoices WHERE user_id = $1 AND code = $2`, [
+        +userId,
+        invoiceCode,
+      ]);
+    }
+  }
+
   static async addItems(items, userId, invoiceId) {
     if (items) {
       const newItems = [];
@@ -317,7 +322,7 @@ class Invoice {
         const itemRes = await db.query(itemQuery, [
           indexCount + 1,
           +userId,
-          +data.invoiceId,
+          +invoiceId,
           item.description,
           +item.rate,
           +item.quantity,

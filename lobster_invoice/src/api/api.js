@@ -113,6 +113,11 @@ class LobsterApi {
     return res.invoice;
   }
 
+  static async deleteInvoice(userId, code) {
+    let res = await this.request(`invoices/${userId}/${code}`, {}, "delete");
+    return "deleted", res.invoice;
+  }
+
   /** Get list of invoices */
 
   static async getInvoices(userId) {
