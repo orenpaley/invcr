@@ -1,134 +1,207 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Table, Button } from "reactstrap";
-
-import { useState, useContext } from "react";
-import { useEffect } from "react";
+import Chart from "./Chart";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
-import { useNavigate, useLocation, NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [user, setUser] = useContext(
-    userContext || JSON.parse(localStorage.getItem("curr"))
-  );
+  const [paid, setPaid] = useState(0);
+  const [owed, setOwed] = useState(0);
+  const [statuses, setStatuses] = useState({});
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("curr")));
+
+  const [chartData, setChartData] = useState(null);
+
+  const [refreshChart, setRefreshChart] = useState(false);
 
   useEffect(() => {
     const fetchInvoices = async () => {
-      setInvoices(await LobsterApi.getInvoices(user.id));
+      try {
+        const fetchedInvoices = await LobsterApi.getInvoices(user.id);
+        setInvoices(fetchedInvoices);
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+      }
     };
-    const fetchClients = async () => {
-      setClients(await LobsterApi.getClients(user.id));
-    };
+
     fetchInvoices();
-    fetchClients();
-  }, [user]);
+  }, [user, paid, owed, statuses]);
+
+  useEffect(() => {
+    const calculateTotals = () => {
+      console.log("effect -> CALCULATING TOTALS");
+      let invPaid = 0;
+      let invOwed = 0;
+      for (let inv of invoices) {
+        if (inv.status === "paid") {
+          invPaid += +inv.total;
+        }
+        if (inv.status === "sent" || inv.status === "overdue") {
+          invOwed += +inv.total;
+        }
+      }
+      setPaid(invPaid);
+      setOwed(invOwed);
+    };
+    calculateTotals();
+  }, [invoices, statuses]);
+
+  useEffect(() => {
+    const chartData = {
+      labels: ["Paid/Owed"],
+      datasets: [
+        {
+          label: "paid",
+          data: [paid],
+          backgroundColor: ["#36A2EB"],
+        },
+        {
+          label: "owed",
+          data: [owed],
+          backgroundColor: ["#FF6384"],
+        },
+      ],
+    };
+    setChartData(chartData);
+  }, [paid, owed, statuses]);
+
+  useEffect(() => {
+    const fetchChartData = () => {
+      const chartData = {
+        labels: ["Paid/Owed"],
+        datasets: [
+          {
+            label: "paid",
+            data: [paid],
+            backgroundColor: ["#36A2EB"],
+          },
+          {
+            label: "owed",
+            data: [owed],
+            backgroundColor: ["#FF6384"],
+          },
+        ],
+      };
+      setChartData(chartData);
+    };
+
+    fetchChartData();
+    handleRefreshChart();
+  }, [paid, owed, statuses]);
+
+  const handleRefreshChart = () => {
+    // Toggle the refreshChart state variable to trigger re-render
+
+    setRefreshChart((prevState) => !prevState);
+  };
 
   const handleOpenInvoice = async (e) => {
     e.preventDefault();
-    console.log("invoice clicked", e.target.dataset.code);
-    const getInvoiceData = async () => {
-      let data = await LobsterApi.getInvoice(user.id, e.target.dataset.code);
-      console.log("data", data);
-      return data;
-    };
-    const data = await getInvoiceData();
-    console.log("opening invoice with data! ->", data);
-    navigate("/", { state: data });
+    const invoiceCode = e.target.dataset.code;
+    try {
+      const data = await LobsterApi.getInvoice(user.id, invoiceCode);
+      navigate("/", { state: data });
+    } catch (error) {
+      console.error("Error opening invoice:", error);
+    }
   };
-
-  const [statuses, setStatuses] = useState([]);
 
   const options = [
     {
       label: "created",
       value: "created",
     },
-
     {
       label: "paid",
       value: "paid",
     },
-
     {
       label: "sent",
       value: "sent",
     },
-
     {
       label: "overdue",
       value: "overdue",
     },
   ];
 
-  const handleClick = (e) => {
+  const handleClick = async (e) => {
     e.preventDefault();
-    console.log("name", e.target.name);
-    console.log("e.target.value", e.target.value);
-
     const { name, value } = e.target;
-    const patch = async () => {
-      setStatuses({ ...statuses, [name]: value });
-      console.log("statuses", statuses);
+    try {
       await LobsterApi.patchInvoice(user.id, name, { status: value });
-      console.log(`status updated ${name} -> ${value}`);
-    };
-    patch();
-
-    // const res = LobsterApi.patchInvoice(user.id, invoice.code, {
-    //   status: status,
-    // });
+      console.log(`Status updated for ${name}: ${value}`);
+      setStatuses((prevStatuses) => ({
+        ...prevStatuses,
+        [name]: value,
+      }));
+      handleRefreshChart(); // Refresh the chart component
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+    }
   };
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.preventDefault();
-    LobsterApi.deleteInvoice(user.id, e.target.value);
-    console.log("deleted invoice -", e.target.value);
+    const invoiceCode = e.target.value;
+    try {
+      await LobsterApi.deleteInvoice(user.id, invoiceCode);
+      console.log("Deleted invoice:", invoiceCode);
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+    }
   };
+
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>Invoice Code</th>
-          <th>Client Name</th>
-          <th>status</th>
-          <th>Date</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {invoices.map((invoice) => (
-          <tr key={invoice.code}>
-            <th
-              data-code={invoice.code}
-              onClick={handleOpenInvoice}
-              scope="row"
-            >
-              {invoice.code}
-            </th>
-            <td>{invoice.clientName}</td>
-            <td>
-              <select
-                caret
-                name={invoice.code}
-                value={statuses[invoice.code] || invoice.status}
-                onChange={handleClick}
-              >
-                {options.map((option) => (
-                  <option value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </td>
-            <td>{invoice.dueDate}</td>
-            <td>{invoice.total}</td>
-            <Button onClick={handleDelete} value={invoice.code}>
-              X
-            </Button>
+    <>
+      <Table>
+        <thead>
+          <tr>
+            <th>Invoice Code</th>
+            <th>Client Name</th>
+            <th>status</th>
+            <th>Date</th>
+            <th>Total</th>
           </tr>
-        ))}
-        {/* <div>
+        </thead>
+        <tbody>
+          {invoices.map((invoice) => (
+            <tr key={invoice.code}>
+              <th
+                data-code={invoice.code}
+                onClick={handleOpenInvoice}
+                scope="row"
+              >
+                {invoice.code}
+              </th>
+              <td>{invoice.clientName}</td>
+              <td>
+                <select
+                  caret
+                  name={invoice.code}
+                  value={statuses[invoice.code] || invoice.status}
+                  onChange={handleClick}
+                >
+                  {options.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </td>
+              <td>{invoice.dueDate}</td>
+              <td>{invoice.total}</td>
+              <Button
+                color="danger"
+                onClick={handleDelete}
+                value={invoice.code}
+              >
+                X
+              </Button>
+            </tr>
+          ))}
+          {/* <div>
       {invoices.map((i, index) => (
         <div key={index} style={{ backgroundColor: "pink", margin: "10px" }}>
           <div>Client: {i.clientName}</div>
@@ -140,8 +213,25 @@ const Invoices = () => {
         </div>
       ))}
     </div> */}
-      </tbody>
-    </Table>
+        </tbody>
+      </Table>
+
+      <div>
+        <Button color="warning" onClick={handleRefreshChart}>
+          Refresh Chart
+        </Button>
+        <Chart data={chartData} key={refreshChart} />
+        <div
+          style={{
+            display: "flex",
+            gap: "70px",
+            margin: "auto",
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        ></div>
+      </div>
+    </>
   );
 };
 

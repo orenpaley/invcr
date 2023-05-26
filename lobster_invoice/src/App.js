@@ -34,21 +34,6 @@ function App() {
     getLoggedUser();
   }, []);
 
-  // const handleSignupChange = (e) => {
-  //   e.preventDefault();
-  //   if (e.target.id === email) {
-  //     setNewUser({ ...user, [e.target.id]: email });
-  //   } else if (e.target.id === password) {
-  //     setPassword(e.target.value);
-  //   } else if (e.target.id === firstName) {
-  //     setFirstName(e.target.value);
-  //   } else if (e.target.id === lastName) {
-  //     setLasttName(e.target.value);
-  //   } else if (e.target.id === email) {
-  //     setEmail(e.target.value);
-  //   }
-  // };
-
   return (
     <BrowserRouter>
       <userContext.Provider value={[context, setContext]}>

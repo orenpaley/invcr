@@ -34,6 +34,26 @@ h4 {
   border: 0;
 }
 
+.titleInput {
+  border: 3px solid black !important;
+  min-width: 100mm;
+  min-height: 22mm;
+  margin: 15px !important;
+  padding: 15px !important;
+  font-size: 44px !important;
+  font-weight: 700 !important;
+  display: inline-block !important;
+  position: relative !important;
+  left: 50% !important; 
+  transform: translateX(-50%) !important;
+  background-color: white !important;
+  text-align: center !important;
+}
+
+.titleInput:hover {
+  background-color: white !important;
+}
+
 .downloadBtn, .saveBtn {
   color: white !important;
   text-shadow: -1px 0px 4px rgba(196, 175, 237, 0.912);
@@ -53,14 +73,20 @@ input, Input, textarea {
   
 
 }
+input, Input, textarea {
+  background-color: yellow !important;
+  border: 1px black solid !important;
+  max-width: fit-content;
+  margin-right: 3px !important;
+}
 
 input:hover, Input:hover, textarea:hover {
    
   /* font-size: 16px !important; */
-  background-color: yellow !important; 
-  border: 1.4px black solid !important;
+  /* background-color: yellow !important;  */
+ 
   
-  max-width: fit-content;
+
 }
 
 Input {
@@ -106,4 +132,11 @@ td {
 
 .remove:hover {
   background-color: darkred !important;
+}
+
+.errorMsg {
+  background-color: rgb(240, 94, 94);
+  text-align: center;
+  font-weight: bold;
+  color: white
 }

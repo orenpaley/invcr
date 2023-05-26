@@ -4,7 +4,11 @@ import "./Invoice.css";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useState, useContext } from "react";
-import { initialValues, initialItem } from "./initialValues";
+import {
+  initialValues,
+  initialItem,
+  initialValuesClear,
+} from "./initialValues";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
 
@@ -17,18 +21,17 @@ import {
   Label,
   Input,
   Button,
-  FormText,
 } from "reactstrap";
+
+import EditableField from "../../helpers/EditableField";
 
 const Invoice = ({ data }) => {
   const [values, setValues] = useState(data || initialValues);
-  console.log("values of the invoice opened => ", values);
-  console.log("values total => ", values.total);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(null);
   const [user, setUser] = useContext(userContext);
-
-  console.log("new total ", total);
+  const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     let itemsTotal = 0;
@@ -37,17 +40,15 @@ const Invoice = ({ data }) => {
       const rateNum = parseFloat(item.rate);
       const amount = quantNum && rateNum ? quantNum * rateNum : 0;
       itemsTotal += amount;
-      console.log("subtotal", subtotal);
     });
     setSubtotal(itemsTotal);
-  }, [data, values]);
+  }, [data, values, total]);
 
   useEffect(() => {
     let newTotal = subtotal * +values.taxRate + subtotal;
     setTotal(newTotal.toFixed(2));
     values.total = newTotal;
-    console.log("total useeffect", total, subtotal, newTotal);
-  }, [subtotal]);
+  }, [subtotal, values.taxRate]);
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -59,29 +60,46 @@ const Invoice = ({ data }) => {
     });
   };
 
+  const handleToggleEditMode = () => {
+    setEditMode(!editMode);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
-    console.log("user id on save", user.id);
+
     const invoiceCheck = async () => {
       let isSaved = null;
       try {
         isSaved = await LobsterApi.getInvoice(user.id, values.code);
       } catch (e) {
         isSaved = null;
+      } finally {
+        return isSaved;
       }
-      return isSaved;
     };
     const isInvoice = await invoiceCheck();
-    console.log("is invoice======= ", isInvoice);
+
     const saveInvoice = async () => {
       if (isInvoice) {
-        console.log("this is the invoice -> ", isInvoice);
-        await LobsterApi.patchInvoice(user.id, values.code, values);
+        try {
+          await LobsterApi.patchInvoice(user.id, values.code, values);
+        } catch (error) {
+          setError("Failed to update invoice. Please try again."); // Set the error message
+        }
       } else {
-        await LobsterApi.saveInvoice(user.id, values);
+        try {
+          await LobsterApi.saveInvoice(user.id, values);
+        } catch (error) {
+          setError("Log in to save.");
+        }
       }
     };
     saveInvoice();
+  };
+
+  const handleClear = (e) => {
+    e.preventDefault();
+    setValues(initialValuesClear);
   };
 
   const handleItemChange = (index, name, value) => {
@@ -99,7 +117,6 @@ const Invoice = ({ data }) => {
     // current.items[index] = { [name]: value };
     // return current;
     setValues({ ...values, items });
-    console.log("values on item change", values);
   };
 
   const getTotal = (quantity, rate) => {
@@ -131,6 +148,7 @@ const Invoice = ({ data }) => {
   const getItems = () => {
     let items = values.items;
     let itemArr = [];
+    console.log("items??? for download", items);
     items.forEach((item) => {
       let vals = Object.values(item);
       itemArr.push([vals.map((v) => String(v))]);
@@ -179,16 +197,13 @@ const Invoice = ({ data }) => {
 
     const items = getItems();
     for (let item of items) {
-      item.splice(0, 3);
-      console.log("what is in item?", item);
-      let itemTotal = +item[1] * +item[2];
-      item[3] = itemTotal;
+      item[3] = +item[1] * +item[2];
     }
-    console.log("items getting parsed to pdf", items);
+
     autoTable(doc, {
       startY: 80,
       head: [["Description", "Rate", "Quantity", "Total"]],
-      body: items,
+      body: [...items],
     });
     let finalY = doc.previousAutoTable.finalY;
 
@@ -201,7 +216,7 @@ const Invoice = ({ data }) => {
 
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
-    doc.text(String(total), 170, finalY + 30);
+    doc.text(String(values.total), 170, finalY + 30);
 
     doc.text("Terms:", 20, finalY + 10);
     doc.text(String(values.terms), 20, finalY + 20);
@@ -214,19 +229,29 @@ const Invoice = ({ data }) => {
   return (
     <>
       <div>
-        <h2
-          style={{
-            maxWidth: "100mm",
-            border: "3px solid black",
-            margin: "15px auto",
-            textAlign: "center",
-            padding: "15px",
-            fontSize: "44px",
-            fontWeight: "700",
-          }}
+        <EditableField
+          id="code"
+          name="code"
+          placeholder="invoice code"
+          className="titleInput"
+          value={values.code}
+          onChange={handleChange}
+          type="text"
+          editMode={editMode}
         >
-          {values.code}
-        </h2>
+          <h2>{values.code}</h2>
+        </EditableField>
+        {error && <div className="errorMsg warning">{error}</div>}
+
+        {editMode ? (
+          <h3 style={{ margin: "auto", textAlign: "center", color: "orange" }}>
+            Edit Mode
+          </h3>
+        ) : (
+          <h3 style={{ margin: "auto", textAlign: "center", color: "green" }}>
+            View Mode
+          </h3>
+        )}
         <div
           style={{
             color: "white",
@@ -243,6 +268,15 @@ const Invoice = ({ data }) => {
           </Button>
           <Button className="btn btn-warning saveBtn" onClick={handleSave}>
             Save
+          </Button>
+          <Button className="btn btn-secondary saveBtn" onClick={handleClear}>
+            Clear
+          </Button>
+          <Button
+            className="btn btn-success saveBtn"
+            onClick={handleToggleEditMode}
+          >
+            View/Edit
           </Button>
         </div>
       </div>
@@ -273,11 +307,18 @@ const Invoice = ({ data }) => {
             <Col>
               <h4>Billing Details</h4>
               <Form>
-                <div className="group">
+                <div
+                  style={{
+                    padding: "12px",
+                    border: "1px black dashed",
+                    width: "80%",
+                  }}
+                  className="group"
+                >
                   <Label for="firstName" hidden>
                     First Name
                   </Label>
-                  <Input
+                  <EditableField
                     id="firstName"
                     name="firstName"
                     placeholder="first name"
@@ -285,162 +326,190 @@ const Invoice = ({ data }) => {
                     value={values.firstName}
                     onChange={handleChange}
                     style={{ display: "inline", width: "110px" }}
+                    editMode={editMode}
                   />
                   <span style={{ display: "inline !important" }}>
                     <Label for="lastName" hidden>
-                      First Name
+                      Last Name
                     </Label>
-                    <Input
+                    <EditableField
                       id="lastName"
                       name="lastName"
                       placeholder="last name"
                       type="text"
                       value={values.lastName}
                       onChange={handleChange}
+                      editMode={editMode}
                       style={{ display: "inline", width: "110px" }}
                     />
                   </span>
-                </div>
-                <div className="group">
-                  <Label for="address" hidden>
-                    Address
-                  </Label>
-                  <Input
-                    type="text"
-                    name="address"
-                    placeholder="address line 1"
-                    value={values.address}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <Label for="cityStateZip" hidden>
-                    City, State, Zip
-                  </Label>
-                  <Input
-                    id="cityStateZip"
-                    name="cityStateZip"
-                    placeholder="City,State,Zip"
-                    type="text"
-                    value={values.cityStateZip}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <Label for="email" hidden>
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    type="email"
-                    value={values.email}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <span>
-                    <strong>Invoice To:</strong>
-                  </span>
-                </div>
-                <div className="group">
-                  <Label for="clientName" hidden>
-                    Client Name
-                  </Label>
-                  <Input
-                    id="clientName"
-                    name="clientName"
-                    placeholder="Client Name"
-                    type="text"
-                    value={values.clientName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <Label for="clientAddress" hidden>
-                    Client Address
-                  </Label>
-                  <Input
-                    type="text"
-                    name="clientAddress"
-                    placeholder="client address line 1"
-                    value={values.clientAddress}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <Label for="clientCityStateZip" hidden>
-                    Client City, State, Zip
-                  </Label>
-                  <Input
-                    id="clientCityStateZip"
-                    name="clientCityStateZip"
-                    placeholder="Client City,State,Zip"
-                    type="text"
-                    value={values.clientCityStateZip}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <Label for="clientEmail" hidden>
-                    Client Email
-                  </Label>
-                  <Input
-                    id="clientEmail"
-                    name="clientEmail"
-                    placeholder="Client Email"
-                    type="email"
-                    value={values.clientEmail}
-                    onChange={handleChange}
-                  />
+
+                  <div className="group">
+                    <Label for="address" hidden>
+                      Address
+                    </Label>
+                    <span>
+                      <EditableField
+                        type="text"
+                        name="address"
+                        placeholder="address line 1"
+                        value={values.address}
+                        onChange={handleChange}
+                        editMode={editMode}
+                      />
+                    </span>
+                  </div>
+
+                  <div className="group">
+                    <Label for="cityStateZip" hidden>
+                      City, State, Zip
+                    </Label>
+                    <span>
+                      <EditableField
+                        id="cityStateZip"
+                        name="cityStateZip"
+                        placeholder="City,State,Zip"
+                        type="text"
+                        value={values.cityStateZip}
+                        onChange={handleChange}
+                        editMode={editMode}
+                      />
+                    </span>
+                  </div>
+
+                  <div className="group">
+                    <Label for="email" hidden>
+                      Email
+                    </Label>
+                    <EditableField
+                      id="email"
+                      name="email"
+                      placeholder="Email"
+                      type="email"
+                      value={values.email}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
+                  <div>
+                    <span>
+                      <strong>Invoice To:</strong>
+                    </span>
+                  </div>
+                  <div className="group">
+                    <Label for="clientName" hidden>
+                      Client Name
+                    </Label>
+                    <EditableField
+                      id="clientName"
+                      name="clientName"
+                      placeholder="Client Name"
+                      type="text"
+                      value={values.clientName}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
+                  <div className="group">
+                    <Label for="clientAddress" hidden>
+                      Client Address
+                    </Label>
+                    <EditableField
+                      type="text"
+                      name="clientAddress"
+                      placeholder="client address line 1"
+                      value={values.clientAddress}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
+                  <div className="group">
+                    <Label for="clientCityStateZip" hidden>
+                      Client City, State, Zip
+                    </Label>
+                    <EditableField
+                      id="clientCityStateZip"
+                      name="clientCityStateZip"
+                      placeholder="Client City,State,Zip"
+                      type="text"
+                      value={values.clientCityStateZip}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
+                  <div className="group">
+                    <Label for="clientEmail" hidden>
+                      Client Email
+                    </Label>
+                    <EditableField
+                      id="clientEmail"
+                      name="clientEmail"
+                      placeholder="Client Email"
+                      type="email"
+                      value={values.clientEmail}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
                 </div>
               </Form>
             </Col>
             <Col>
               <h4>Invoice Details</h4>
+
               <Form>
-                <div className="group" id="formBasicInvoiceNumber">
-                  <strong>
-                    <Label for="code">
-                      Invoice Code (must be uniqe to save)
-                    </Label>
-                  </strong>
-                  <Input
-                    name="code"
-                    type="text"
-                    placeholder="invoice code"
-                    value={values.code}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="group">
-                  <strong>
-                    <Label for="date">Date</Label>
-                  </strong>
-                  <Input
-                    id="date"
-                    name="date"
-                    placeholder="January 1, 2023"
-                    type="date"
-                    value={values.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="group">
-                  <strong>
-                    <Label for="due-date">Due Date</Label>
-                  </strong>
-                  <Input
-                    id="dueDate"
-                    name="dueDate"
-                    placeholder="February 1st, 2023"
-                    type="date"
-                    value={values.dueDate}
-                    onChange={handleChange}
-                    required
-                  />
+                <div
+                  style={{
+                    padding: "12px",
+                    border: "1px black dashed",
+                    width: "80%",
+                  }}
+                  className="group"
+                  id="formBasicInvoiceNumber"
+                >
+                  <div>
+                    <strong>
+                      <Label for="code">Invoice Code</Label>
+                    </strong>
+                    <EditableField
+                      name="code"
+                      type="text"
+                      placeholder="invoice code"
+                      value={values.code}
+                      onChange={handleChange}
+                      editMode={editMode}
+                    />
+                  </div>
+                  <div className="group">
+                    <strong>
+                      <Label for="date">Date</Label>
+                    </strong>
+                    <EditableField
+                      id="date"
+                      name="date"
+                      placeholder="January 1, 2023"
+                      type="date"
+                      value={values.date}
+                      onChange={handleChange}
+                      editMode={editMode}
+                      required
+                    />
+                  </div>
+                  <div className="group">
+                    <strong>
+                      <Label for="due-date">Due Date</Label>
+                    </strong>
+                    <EditableField
+                      id="dueDate"
+                      name="dueDate"
+                      placeholder="February 1st, 2023"
+                      type="date"
+                      value={values.dueDate}
+                      onChange={handleChange}
+                      editMode={editMode}
+                      required
+                    />
+                  </div>
                 </div>
               </Form>
             </Col>
@@ -461,7 +530,7 @@ const Invoice = ({ data }) => {
                     return (
                       <tr>
                         <td>
-                          <Input
+                          <EditableField
                             type="textarea"
                             placeholder="Item 1 + description"
                             name="description"
@@ -469,10 +538,11 @@ const Invoice = ({ data }) => {
                             onChange={(value) =>
                               handleItemChange(i, "description", value)
                             }
+                            editMode={editMode}
                           />
                         </td>
                         <td>
-                          <Input
+                          <EditableField
                             type="number"
                             pattern="[0-9]"
                             placeholder="quantity"
@@ -481,10 +551,11 @@ const Invoice = ({ data }) => {
                             onChange={(value) =>
                               handleItemChange(i, "quantity", value)
                             }
+                            editMode={editMode}
                           />
                         </td>
                         <td>
-                          <Input
+                          <EditableField
                             type="number"
                             pattern="[0-9]"
                             placeholder="rate"
@@ -493,42 +564,76 @@ const Invoice = ({ data }) => {
                             onChange={(value) =>
                               handleItemChange(i, "rate", value)
                             }
+                            editMode={editMode}
                           />
                         </td>
                         <td>
                           <div>{getTotal(+item.quantity, +item.rate)}</div>
                         </td>
-                        <Button
-                          className="remove"
-                          style={{ color: "black", border: "1px solid red" }}
-                          onClick={() => {
-                            handleRemove(i);
-                          }}
-                        >
-                          X
-                        </Button>
+                        {editMode ? (
+                          <Button
+                            className="remove"
+                            style={{ color: "black", border: "1px solid red" }}
+                            onClick={() => {
+                              handleRemove(i);
+                            }}
+                          >
+                            X
+                          </Button>
+                        ) : (
+                          <Button
+                            disabled
+                            hidden
+                            className="remove"
+                            style={{ color: "black", border: "1px solid red" }}
+                            onClick={() => {
+                              handleRemove(i);
+                            }}
+                          >
+                            X
+                          </Button>
+                        )}
                       </tr>
                     );
                   })}
                   <div>
                     <p>
                       <span>
-                        <Button
-                          className="add"
-                          style={{
-                            fontSize: "22px",
-                            backgroundColor: "lightgreen",
-                            textAlign: "center",
-                            margin: "8px",
-                            padding: " 6px 16px",
-                            margin: "8px",
-                          }}
-                          onClick={handleAdd}
-                        >
-                          +
-                        </Button>
+                        {editMode ? (
+                          <Button
+                            className="add"
+                            style={{
+                              fontSize: "22px",
+                              backgroundColor: "lightgreen",
+                              textAlign: "center",
+                              margin: "8px",
+                              padding: " 6px 16px",
+                              margin: "8px",
+                            }}
+                            onClick={handleAdd}
+                          >
+                            +
+                          </Button>
+                        ) : (
+                          <Button
+                            disabled
+                            hidden
+                            className="add"
+                            style={{
+                              fontSize: "22px",
+                              backgroundColor: "lightgreen",
+                              textAlign: "center",
+                              margin: "8px",
+                              padding: " 6px 16px",
+                              margin: "8px",
+                            }}
+                            onClick={handleAdd}
+                          >
+                            +
+                          </Button>
+                        )}
                       </span>
-                      Add Line Item
+                      {editMode ? <p>Add Line Item</p> : <p></p>}
                     </p>
                   </div>
                 </tbody>
@@ -541,20 +646,21 @@ const Invoice = ({ data }) => {
                 <strong>
                   <Label for="terms">Terms</Label>
                 </strong>
-                <Input
+                <EditableField
                   id="terms"
                   name="terms"
                   placeholder="type terms here ex : net 30"
                   type="textarea"
                   value={values.terms}
                   onChange={handleChange}
+                  editMode={editMode}
                 />
               </div>
               <div className="group">
                 <strong>
                   <Label for="notes">Notes</Label>
                 </strong>
-                <Input
+                <EditableField
                   id="notes"
                   className="textarea"
                   name="notes"
@@ -562,6 +668,7 @@ const Invoice = ({ data }) => {
                   type="textarea"
                   value={values.notes}
                   onChange={handleChange}
+                  editMode={editMode}
                 />
               </div>
             </Col>
@@ -576,13 +683,14 @@ const Invoice = ({ data }) => {
                 <strong>
                   <Label for="taxRate">Tax Rate</Label>
                 </strong>
-                <Input
+                <EditableField
                   id="taxRate"
                   name="taxRate"
                   placeholder="Thank you!"
                   type="text"
                   value={values.taxRate}
                   onChange={handleChange}
+                  editMode={editMode}
                 />
               </div>
               <div className="group">

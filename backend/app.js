@@ -1,6 +1,6 @@
 "use strict";
 
-/** Express app for jobly. */
+/** Express app for Lobster Invoice. */
 
 const express = require("express");
 const cors = require("cors");

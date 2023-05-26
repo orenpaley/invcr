@@ -1,4 +1,12 @@
+import SignupForm from "./SignupForm";
+import userContext from "../../userContext";
+import { useState, useContext } from "react";
+
 function Signup() {
-  return <div>Signup</div>;
+  return (
+    <div>
+      <SignupForm />
+    </div>
+  );
 }
 export default Signup;

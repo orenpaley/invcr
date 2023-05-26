@@ -16,20 +16,6 @@ function Login() {
     }
   };
 
-  // const handleSignupChange = (e) => {
-  //   e.preventDefault();
-  //   if (e.target.id === username) {
-  //     setUsername(e.target.value);
-  //   } else if (e.target.id === password) {
-  //     setPassword(e.target.value);
-  //   } else if (e.target.id === firstName) {
-  //     setFirstName(e.target.value);
-  //   } else if (e.target.id === lastName) {
-  //     setLastName(e.target.value);
-  //   } else if (e.target.id === email) {
-  //     setEmail(e.target.value);
-  //   }
-  // };
   return (
     <div className="login-page">
       <LoginForm
