@@ -16,7 +16,7 @@ const { BCRYPT_WORK_FACTOR } = require("../config.js");
 class User {
   /** authenticate user with email, password.
    *
-   * Returns { email, first_name, last_name, address, phone, logo, is_admin }
+   * Returns { email, name, address, phone, logo, is_admin }
    *
    * Throws UnauthorizedError is user not found or wrong password.
    **/
@@ -27,8 +27,7 @@ class User {
       `SELECT email,
               id,
               password,
-              first_name AS "firstName",
-              last_name AS "lastName",
+              name,
               address,
               phone, 
               logo,
@@ -53,7 +52,7 @@ class User {
 
   /** Register user with data.
    *
-   * Returns { email, firstName, lastName, address , phone, logo, isAdmin }
+   * Returns { email, name, address , phone, logo, isAdmin }
    *
    * Throws BadRequestError on duplicates.
    **/
@@ -61,8 +60,7 @@ class User {
   static async register({
     email,
     password,
-    firstName,
-    lastName,
+    name,
     address,
     phone,
     logo,
@@ -85,24 +83,14 @@ class User {
       `INSERT INTO users
            (email,
             password,
-            first_name,
-            last_name,
-            address,
+            name,
+            address, 
             phone, 
             logo,
             is_admin)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           RETURNING email, first_name AS "firstName", last_name AS "lastName", address, phone, logo, is_admin AS "isAdmin"`,
-      [
-        email,
-        hashedPassword,
-        firstName,
-        lastName,
-        address,
-        phone,
-        logo,
-        isAdmin,
-      ]
+           RETURNING email, name, address, phone, logo, is_admin AS "isAdmin"`,
+      [email, hashedPassword, name, address, phone, logo, isAdmin]
     );
 
     const user = result.rows[0];
@@ -112,15 +100,14 @@ class User {
 
   /** Find all users.
    *
-   * Returns [{ email, first_name, last_name, is_admin }, ...]
+   * Returns [{ email, name, is_admin }, ...]
    **/
 
   static async findAll() {
     const result = await db.query(
       `SELECT id, 
               email,
-              first_name AS "firstName",
-              last_name AS "lastName",
+              name,
               is_admin AS "isAdmin"
            FROM users
            `
@@ -131,7 +118,7 @@ class User {
 
   /** Given an email, return data about user.
    *
-   * Returns { email, first_name, last_name, address, phone, logo, is_admin}
+   * Returns { email, name, address, phone, logo, is_admin}
 
    * Throws NotFoundError if user not found.
    **/
@@ -141,8 +128,7 @@ class User {
       `SELECT 
               id,
               email,
-              first_name AS "firstName",
-              last_name AS "lastName",
+              name,
               address,
               phone,
               logo,
@@ -165,9 +151,9 @@ class User {
    * all the fields; this only changes provided ones.
    *
    * Data can include:
-   *   { firstName, lastName, password, phone, address, logo, isAdmin }
+   *   {name, password, phone, address, logo, isAdmin }
    *
-   * Returns { email, firstName, lastName, address, phone, logo, isAdmin }
+   * Returns { email, name, address, phone, logo, isAdmin }
    *
    * Throws NotFoundError if not found.
    *
@@ -182,8 +168,6 @@ class User {
     }
 
     const formattedSql = sqlForPartialUpdate(data, {
-      firstName: "first_name",
-      lastName: "last_name",
       isAdmin: "is_admin",
     });
     const userIdx = "$" + (formattedSql.values.length + 1);
@@ -192,8 +176,7 @@ class User {
                       SET ${formattedSql.setCols} 
                       WHERE id = ${userIdx} 
                       RETURNING email,
-                                first_name AS "firstName",
-                                last_name AS "lastName",
+                                name,
                                 address,
                                 phone, 
                                 logo, 

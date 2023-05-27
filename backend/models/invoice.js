@@ -18,14 +18,11 @@ class Invoice {
       clientId,
       code,
       email,
-      firstName,
-      lastName,
+      name,
       address,
-      cityStateZip,
       logo = "https://www.pixfiniti.com/wp-content/uploads/2020/06/small_house_logo_template_3.png",
       clientName,
       clientAddress,
-      clientCityStateZip,
       clientEmail,
       date,
       dueDate,
@@ -56,14 +53,11 @@ class Invoice {
           client_id,
           code,
           email,
-          first_name,
-          last_name,
+          name,
           address, 
-          city_state_zip,
           logo, 
           client_name,
           client_address, 
-          client_city_state_zip,
           client_email, 
           date, 
           due_date,
@@ -74,10 +68,8 @@ class Invoice {
           total, 
           currency, 
           status)
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
-        RETURNING user_id AS "userId", client_id AS "clientId", code, email, first_name AS "firstName",
-        last_name AS "lastName", address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
-        client_city_state_zip AS "clientCityStateZip",
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+        RETURNING user_id AS "userId", client_id AS "clientId", code, email, name, address, logo, client_name AS "clientName", client_address AS "clientAddress", 
         client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "Input", 
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", total, currency, status`,
 
@@ -86,14 +78,11 @@ class Invoice {
         clientId,
         code,
         email,
-        firstName,
-        lastName,
+        name,
         address,
-        cityStateZip,
         logo,
         clientName,
         clientAddress,
-        clientCityStateZip,
         clientEmail,
         date,
         dueDate,
@@ -107,7 +96,7 @@ class Invoice {
       ]
     );
     const invoice = result.rows[0];
-
+    // may not need indexCount
     const newItems = [];
     for (let item of items) {
       const itemQuery = `INSERT INTO items
@@ -141,10 +130,9 @@ class Invoice {
   static async open(userId, code) {
     const invoiceRes = await db.query(
       `SELECT id, user_id AS "userId", client_id AS "clientId", code,
-              email, first_name AS "firstName", last_name AS "lastName",
-              address, city_state_zip AS "cityStateZip", logo, client_name AS "clientName", client_address AS "clientAddress", 
-              client_city_state_zip AS "clientCityStateZip", client_email AS "clientEmail", created_at AS "createdAt", date, 
-              due_date as "dueDate", submitted_at AS "submittedAt", 
+              email, name, address, logo, client_name AS "clientName", 
+              client_address AS "clientAddress", client_email AS "clientEmail", 
+              created_at AS "createdAt", date,  due_date as "dueDate", submitted_at AS "submittedAt", 
               terms, notes, tax_rate AS "taxRate", total, currency, status
               FROM invoices
       WHERE user_id = $1 AND code = $2`,
@@ -158,10 +146,8 @@ class Invoice {
                         FROM items
                         WHERE user_id = $1 AND invoice_id = $2;`;
     const items = await db.query(itemQuery, [userId, invoice.id]);
-    console.log("items? -> ", items.rows);
+
     invoice.items = items.rows || [];
-    console.log("invoice on open --> ", invoice);
-    console.log("invoice date", moment(invoice.date).format("YYYY-MM-DD"));
 
     invoice.date = moment(invoice.date).format("YYYY-MM-DD");
     invoice.dueDate = moment(invoice.dueDate).format("YYYY-MM-DD");
@@ -174,8 +160,7 @@ class Invoice {
   /** Given a  user_id, return all invoices for that user .
    *   Given no user_id returns all invoices (admin only permissions should be enabled)
    *
-   * Returns { first_name AS "firstName",
-                last_name AS "lastName",
+   * Returns {  name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
                 due_date AS "dueDate",
@@ -189,8 +174,7 @@ class Invoice {
     if (!userId) {
       const invoicesRes = await db.query(
         `SELECT code,
-                first_name AS "firstName",
-                last_name AS "lastName",
+                name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
                 due_date AS "dueDate",
@@ -202,8 +186,7 @@ class Invoice {
     }
     const invoicesRes = await db.query(
       `SELECT code,
-                first_name AS "firstName",
-                last_name AS "lastName",
+                name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
                 due_date AS "dueDate",
@@ -223,7 +206,7 @@ class Invoice {
 
   /** Given an invoice code and user_id, modify data about user.
    *
-   * Returns { code, first_name, last_name, address,
+   * Returns { code, name, address,
    *           client_name, client_email, created_at}
 
    * Throws NotFoundError if user not found.
@@ -237,12 +220,8 @@ class Invoice {
     const formattedSql = sqlForPartialUpdate(data, {
       userId: "user_id",
       clientId: "client_id",
-      firstName: "first_name",
-      lastName: "last_name",
-      cityStateZip: "city_state_zip",
       clientName: "client_name",
       clientAddress: "client_address",
-      clientCityStateZip: "client_city_state_zip",
       clientEmail: "client_email",
       createdAt: "created_at",
       dueDate: "due_date",
@@ -258,13 +237,10 @@ class Invoice {
       data.id,
       data.userId,
     ]);
-    console.log("did we delete?");
 
     if (currItems) {
-      console.log("CURR ITEMS CURR ITEMS", currItems);
       let indexCount = 1;
       for (let item of currItems) {
-        console.log("i am item", item);
         const itemQuery = `INSERT INTO items
                              (user_id, invoice_id, index, description, rate, quantity)
                               VALUES($1,$2,$3,$4,$5,$6)`;
@@ -283,16 +259,16 @@ class Invoice {
     const querySql = `UPDATE invoices
                       SET ${formattedSql.setCols} 
                       WHERE user_id = ${userIdx} AND code = ${codeIdx}
-                      RETURNING id, user_id AS "userId", code, first_name AS "firstName", last_name AS "lastName", address, city_state_zip AS "cityStateZip", 
-                      client_name AS "clientName", client_address AS "clientAddress", client_city_state_zip AS "clientCityStateZip",
-                      client_email as "clientEmail", created_at as "createdAt", date, due_date AS "dueDate", status, total`;
+                      RETURNING id, user_id AS "userId", code, name, address,
+                      client_name AS "clientName", client_address AS "clientAddress", 
+                      client_email as "clientEmail", created_at as "createdAt", date, 
+                      due_date AS "dueDate", status, total`;
     const result = await db.query(querySql, [
       ...formattedSql.values,
       +userId,
       code,
     ]);
     const invoice = result.rows[0];
-    console.log("invoice data pre item processing ->", invoice);
 
     if (!invoice) throw new NotFoundError(`No user: ${userId}`);
 

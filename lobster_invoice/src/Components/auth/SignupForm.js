@@ -13,13 +13,13 @@ function SignupForm({ handleChange, user, setUser }) {
       e.target.password.value,
       e.target.firstName.value,
       e.target.lastName.value,
-      e.target.address
+      e.target.address.value
     );
     console.log("user Registered", newUser);
     setUser(newUser);
     localStorage.setItem("curr", JSON.stringify(newUser));
-    return;
   };
+
   return (
     <form
       onSubmit={handleSignupSubmit}
@@ -28,31 +28,20 @@ function SignupForm({ handleChange, user, setUser }) {
     >
       <div>
         <div className="col-md-4">
-          <label htmlFor="firstName" className="form-label">
-            First Name
+          <label htmlFor="name" className="form-label">
+            Name
           </label>
           <input
             type="text"
             className="form-control"
-            id="firstName"
+            id="name"
+            name="name"
             onChange={handleChange}
             required
           />
           <div className="valid-feedback">Looks good!</div>
         </div>
-        <div className="col-md-4">
-          <label htmlFor="lastName" className="form-label">
-            Last Name
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="lasttName"
-            onChange={handleChange}
-            required
-          />
-          <div className="valid-feedback">Looks good!</div>
-        </div>
+
         <div className="col-md-4">
           <label htmlFor="email" className="form-label">
             Email
@@ -61,6 +50,7 @@ function SignupForm({ handleChange, user, setUser }) {
             type="email"
             className="form-control"
             id="email"
+            name="email"
             onChange={handleChange}
             required
           />
@@ -75,6 +65,7 @@ function SignupForm({ handleChange, user, setUser }) {
             type="password"
             className="form-control"
             id="password"
+            name="password"
             onChange={handleChange}
             required
           />
@@ -88,9 +79,9 @@ function SignupForm({ handleChange, user, setUser }) {
           <input
             type="text"
             className="form-control"
-            id="address"
+            id="addres"
+            name="address"
             onChange={handleChange}
-            required
           />
           <div className="valid-feedback">Looks good!</div>
         </div>
