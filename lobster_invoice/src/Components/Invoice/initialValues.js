@@ -1,12 +1,9 @@
 export const initialValues = {
-  firstName: "John",
-  lastName: "Doe",
-  address: "123 example st.",
-  cityStateZip: "Anytown, CA, 12345",
+  name: "John Doe",
+  address: "123 example st." + "\n" + "anytown, US, 12345",
   email: "john@doe.com",
   clientName: "Jane Da",
-  clientAddress: "789 something park",
-  clientCityStateZip: "Somewhere, TN, 67890",
+  clientAddress: "789 something park" + "\n" + "anytown, US, 12345",
   clientEmail: "jane@da.com",
   code: "EX-001",
   date: "2023-01-01",
@@ -35,14 +32,11 @@ export const initialValues = {
 };
 
 export const initialValuesClear = {
-  firstName: "",
-  lastName: "",
+  name: "",
   address: "",
-  cityStateZip: "",
   email: "",
   clientName: "",
   clientAddress: "",
-  clientCityStateZip: "",
   clientEmail: "",
   code: "",
   date: "",

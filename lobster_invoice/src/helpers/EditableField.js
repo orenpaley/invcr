@@ -65,7 +65,7 @@ const EditableTextArea = ({
     .split("\n")
     .map((line, index) => <p key={index}>{line}</p>);
 
-  return <p style={{ marginBottom: "0", height: "12px" }}>{displayValue}</p>;
+  return <p style={{ marginBottom: "0" }}>{displayValue}</p>;
 };
 
 export default EditableField;

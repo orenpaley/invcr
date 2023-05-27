@@ -11,8 +11,7 @@ function SignupForm({ handleChange, user, setUser }) {
     const newUser = await LobsterApi.register(
       e.target.email.value,
       e.target.password.value,
-      e.target.firstName.value,
-      e.target.lastName.value,
+      e.target.name.value,
       e.target.address.value
     );
     console.log("user Registered", newUser);

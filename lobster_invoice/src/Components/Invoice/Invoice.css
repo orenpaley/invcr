@@ -1,7 +1,6 @@
 .container-box {
-  font-size: 16px !important;
-  padding: 50px !important;
-  margin: 10px !important;
+  font-size: 18px !important;
+  padding: 15px !important;
   
 }
 
@@ -13,10 +12,14 @@
 }
 
 .form-row {
-  width: 100%;
+  width: 34%;
+  max-width: 48%;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   justify-content: space-between;
+  margin-left: 48px;
+  margin-bottom: 24px;
+  border-bottom: 3px black solid
   
 }
 .heading {
@@ -30,7 +33,7 @@ h4 {
 }
 
 .group {
-  margin-bottom: 2em;
+
   border: 0;
 }
 
@@ -43,6 +46,7 @@ h4 {
   font-weight: 700 !important;
   background-color: white !important;
   text-align: center !important;
+  width: 15%;
 }
 
 .titleInput:hover {
@@ -133,4 +137,6 @@ button {
   padding: 0;
   margin: 0;
   height: 60px;
+
 }
+

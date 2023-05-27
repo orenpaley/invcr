@@ -273,9 +273,31 @@ const Invoice = ({ data, clients }) => {
           {error && <div className="errorMsg warning">{error}</div>}
 
           {editMode ? (
-            <h3 style={{ color: "orange" }}>Edit Mode</h3>
+            <Button
+              onClick={handleToggleEditMode}
+              style={{
+                backgroundColor: "whitesmoke",
+                color: "coral",
+                border: " 2px solid coral",
+                fontSize: "24px",
+                fontWeight: "800",
+              }}
+            >
+              Edit Mode
+            </Button>
           ) : (
-            <h3 style={{ color: "green" }}>View Mode</h3>
+            <Button
+              onClick={handleToggleEditMode}
+              style={{
+                backgroundColor: "whitesmoke",
+                color: "green",
+                border: " 2px green solid",
+                fontWeight: "800",
+                fontSize: "24px",
+              }}
+            >
+              View Mode
+            </Button>
           )}
         </div>
         <div
@@ -303,7 +325,9 @@ const Invoice = ({ data, clients }) => {
             <FormText>Insert Your Logo (optional)</FormText>
           </div> */}
               <div>
-                <h1 className="heading">Invoice</h1>
+                <h1 className="heading">
+                  Invoice: <span>{values.code}</span>
+                </h1>
               </div>
             </div>
 
@@ -364,19 +388,17 @@ const Invoice = ({ data, clients }) => {
                           editMode={editMode}
                         />
                       </div>
-                      <div style={{ marginTop: "24px", marginBottom: "24px" }}>
+                      <div style={{ marginTop: "12px", marginBottom: "12px" }}>
                         <span>
                           <div
                             style={{
                               marginBottom: "5px",
                               borderBottom: "1px red solid",
-                              borderTop: "1px red solid",
                             }}
                           >
                             <strong>
-                              Invoice To:{" "}
+                              Invoice To:
                               <span>
-                                {" "}
                                 {editMode ? (
                                   <select
                                     className="form-select"
@@ -484,6 +506,7 @@ const Invoice = ({ data, clients }) => {
                         <strong>
                           <Label for="code">Invoice Code</Label>
                         </strong>
+                        <br></br>
                         <EditableField
                           name="code"
                           type="text"
@@ -497,6 +520,7 @@ const Invoice = ({ data, clients }) => {
                         <strong>
                           <Label for="date">Date</Label>
                         </strong>
+                        <br></br>
                         <EditableField
                           id="date"
                           name="date"
@@ -512,6 +536,7 @@ const Invoice = ({ data, clients }) => {
                         <strong>
                           <Label for="due-date">Due Date</Label>
                         </strong>
+                        <br></br>
                         <EditableField
                           id="dueDate"
                           name="dueDate"

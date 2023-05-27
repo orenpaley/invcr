@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Route, Routes } from "react-router";
+import { Route, Routes, Navigate } from "react-router";
 import PrivateRoute from "../helpers/PrivateRoute";
 
 import Home from "../Components/Home";
@@ -10,6 +10,7 @@ import Invoices from "../Components/Invoices/Invoices";
 import Clients from "../Components/Clients/Clients";
 import Client from "../Components/Clients/Client";
 import Logout from "../Components/Logout";
+import ErrorPage from "../Components/ErrorPage";
 
 function LobsterRoutes() {
   return (
@@ -22,6 +23,8 @@ function LobsterRoutes() {
         <Route path="/clients" element={<Clients />} />
         <Route path="/client" element={<Client />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/error-page" element={<ErrorPage />} />
+        <Route path="/redirect" element={<Navigate to="/error-page" />} />
       </Routes>
     </div>
   );
