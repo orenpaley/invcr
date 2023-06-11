@@ -2,6 +2,10 @@
 \echo 'Delete and recreate lobster-invoice db?'
 \prompt 'Return for yes or control-C to cancel > ' foo
 
+
+DROP EXTENSION IF EXISTS "uuid-ossp" CASCADE; 
+CREATE EXTENSION "uuid-ossp"; 
+
 DROP DATABASE lobsterinvoice;
 CREATE DATABASE lobsterinvoice;
 \connect lobsterinvoice

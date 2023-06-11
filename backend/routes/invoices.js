@@ -34,10 +34,10 @@ router.post(
  *
  * Returns list of all invoices.
  *
- * Authorization required: admin
+ * Authorization required: admin or curr user
  **/
 
-router.get("/", ensureAdmin, async function (req, res, next) {
+router.get("/", ensureCorrectUserOrAdmin, async function (req, res, next) {
   try {
     const invoices = await Invoice.findAll();
     return res.json({ invoices });
@@ -82,18 +82,15 @@ router.get(
  * Authorization required: admin or same user-as-:email
  **/
 
-router.get(
-  "/:userId/:code",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const invoice = await Invoice.open(req.params.userId, req.params.code);
-      return res.json({ invoice });
-    } catch (err) {
-      return next(err);
-    }
+// no permission for correct user or admin to allow external clients to view
+router.get("/:userId/:id", async function (req, res, next) {
+  try {
+    const invoice = await Invoice.open(req.params.userId, req.params.id);
+    return res.json({ invoice });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** PATCH /[userId]/[code] { invoice } => { invoice }
  *
@@ -106,13 +103,13 @@ router.get(
  **/
 
 router.patch(
-  "/:userId/:code",
+  "/:userId/:id",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
       const invoice = await Invoice.update(
         req.params.userId,
-        req.params.code,
+        req.params.id,
         req.body
       );
       return res.json({ invoice });
@@ -132,8 +129,30 @@ router.delete(
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      await Invoice.remove(req.params.userId, req.params.code);
-      return res.json({ deleted: req.params.userId + "-" + req.params.code });
+      await Invoice.remove(req.params.userId, req.params.id);
+      return res.json({ deleted: req.params.userId + "-" + req.params.id });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// Route to send invoice via Twilio Send Grid
+
+router.post(
+  "/:userId/:invoiceId/send",
+
+  async function (req, res, next) {
+    try {
+      let msgFormatted = {
+        to: req.body.to,
+        from: req.body.from,
+        subject: req.body.subject,
+        text: req.body.text,
+        html: req.body.html,
+      };
+      await Invoice.send(req.params.userId, req.params.invoiceId, msgFormatted);
+      return res.json({ sent: req.params.msg });
     } catch (err) {
       return next(err);
     }

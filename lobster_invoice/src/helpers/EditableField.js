@@ -55,17 +55,17 @@ const EditableTextArea = ({
         className={className}
         onChange={onChange}
         type={type}
-        value={value}
+        value={value || "test"}
         style={style}
       />
     );
   }
 
   const displayValue = value
-    .split("\n")
-    .map((line, index) => <p key={index}>{line}</p>);
+    ? value.split("\n").map((line, index) => <p key={index}>{line}</p>)
+    : value;
 
-  return <p style={{ marginBottom: "0" }}>{displayValue}</p>;
+  return <p style={{ marginBottom: "0" }}>{displayValue || ""}</p>;
 };
 
 export default EditableField;

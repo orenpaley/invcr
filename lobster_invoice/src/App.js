@@ -6,7 +6,8 @@ import Navigation from "./Components/Nav";
 import LobsterRoutes from "./Routes/Routes";
 import LobsterApi from "./API/api";
 import userContext from "./userContext";
-import jwt_decode from "jwt-decode";
+
+import background from "./starrysky.jpeg";
 
 function App() {
   const [context, setContext] = useState({});
@@ -16,19 +17,14 @@ function App() {
 
   useEffect(() => {
     const getLoggedUser = async () => {
-      console.log("token", token);
-
       if (localStorage.getItem("curr")) {
         setContext(JSON.parse(localStorage.getItem("curr")));
-        console.log("context set?", context);
       } else if (token) {
-        let decoded = jwt_decode(token);
-        console.log("token", token);
-        console.log("decoded", decoded);
         LobsterApi.token = token;
         const loggedInUser = await LobsterApi.getUser(context.userId);
         setContext(loggedInUser);
-        console.log("curr user check", context);
+      } else {
+        setContext(false);
       }
     };
     getLoggedUser();
@@ -37,7 +33,13 @@ function App() {
   return (
     <BrowserRouter>
       <userContext.Provider value={[context, setContext]}>
-        <div className="App">
+        <div
+          className="App"
+          style={{
+            backgroundImage: `url(${background})`,
+            backgroundColor: "red",
+          }}
+        >
           <Navigation />
           <LobsterRoutes />
         </div>

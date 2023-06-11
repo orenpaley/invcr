@@ -34,7 +34,9 @@ function Navigation() {
             }}
           >
             <NavItem>
-              <NavLink to="/">Home</NavLink>
+              <NavLink Input={true} to="/">
+                Home
+              </NavLink>
             </NavItem>
             <NavItem>
               <NavLink to="/login">Login</NavLink>
@@ -50,7 +52,9 @@ function Navigation() {
     <>
       <Nav>
         <NavItem className="" style={{ paddingLeft: "24px" }}>
-          <NavLink to="/">Home</NavLink>
+          <NavLink Input to="/">
+            Home
+          </NavLink>
         </NavItem>
 
         <NavItem>

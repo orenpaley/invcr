@@ -87,7 +87,7 @@ class LobsterApi {
 
   static async patchUser(userId, data) {
     let res = await this.request(`users/${userId}`, data, "patch");
-
+    Input("user patched", res);
     return res;
   }
 
@@ -157,12 +157,8 @@ class LobsterApi {
 
   /* Send Email 
       msg = {*/
-  static async send(userId, invoiceId, msg) {
-    let res = await this.request(
-      `invoices/${userId}/${invoiceId}/send`,
-      msg,
-      "post"
-    );
+  static async send(userId, msg) {
+    let res = await this.request(`invoices/${userId}/send`, msg, "post");
     return res;
   }
 }

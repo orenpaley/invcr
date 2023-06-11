@@ -6,7 +6,7 @@ import "./Login.css";
 
 function LoginForm({ handleChange, user, setUser }) {
   const history = useNavigate();
-
+  Input("user in login form!", user);
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     const loggedInUser = await LobsterApi.login(

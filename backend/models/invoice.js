@@ -11,6 +11,8 @@ const {
 } = require("../expressError");
 // const { default: LobsterApi } = require("../../lobster_invoice/src/API/api");
 
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 class Invoice {
   static async save(
     userId,
@@ -40,7 +42,7 @@ class Invoice {
       `SELECT code
            FROM invoices
            WHERE code = $1 AND user_id = $2`,
-      [code, +userId]
+      [code, userId]
     );
 
     if (duplicateCheck.rows[0]) {
@@ -74,7 +76,7 @@ class Invoice {
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", total, currency, status`,
 
       [
-        +userId,
+        userId,
         clientId,
         code,
         email,
@@ -104,7 +106,7 @@ class Invoice {
      VALUES($1,$2,$3,$4,$5,$6)
        `;
       const itemRes = await db.query(itemQuery, [
-        +userId,
+        userId,
         id,
         indexCount,
         item.description,
@@ -120,14 +122,14 @@ class Invoice {
     return invoice;
   }
 
-  /** Given an invoice code and user_id, return an invoice.
+  /** Given an invoice_id and user_id, return an invoice.
    *
    * Returns { invoice }
 
    * Throws NotFoundError if invoice not found.
    **/
 
-  static async open(userId, code) {
+  static async open(userId, id) {
     const invoiceRes = await db.query(
       `SELECT id, user_id AS "userId", client_id AS "clientId", code,
               email, name, address, logo, client_name AS "clientName", 
@@ -135,8 +137,8 @@ class Invoice {
               created_at AS "createdAt", date,  due_date as "dueDate", submitted_at AS "submittedAt", 
               terms, notes, tax_rate AS "taxRate", total, currency, status
               FROM invoices
-      WHERE user_id = $1 AND code = $2`,
-      [+userId, code]
+      WHERE user_id = $1 AND id = $2`,
+      [userId, id]
     );
 
     const invoice = invoiceRes.rows[0];
@@ -152,7 +154,7 @@ class Invoice {
     invoice.date = moment(invoice.date).format("YYYY-MM-DD");
     invoice.dueDate = moment(invoice.dueDate).format("YYYY-MM-DD");
 
-    if (!invoice) throw new NotFoundError(`No invoice for user found: ${code}`);
+    if (!invoice) throw new NotFoundError(`No invoice for user found: ${id}`);
 
     return invoice;
   }
@@ -173,7 +175,9 @@ class Invoice {
   static async findAll(userId = null) {
     if (!userId) {
       const invoicesRes = await db.query(
-        `SELECT code,
+        `SELECT
+                id,
+                code,
                 name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
@@ -185,7 +189,8 @@ class Invoice {
       );
     }
     const invoicesRes = await db.query(
-      `SELECT code,
+      `SELECT id,
+                code,
                 name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
@@ -212,7 +217,7 @@ class Invoice {
    * Throws NotFoundError if user not found.
    **/
 
-  static async update(userId, code, data) {
+  static async update(userId, id, data) {
     const currItems = data.items;
 
     delete data.items;
@@ -229,7 +234,7 @@ class Invoice {
       taxRate: "tax_rate",
     });
     const userIdx = "$" + (formattedSql.values.length + 1);
-    const codeIdx = "$" + (formattedSql.values.length + 2);
+    const idIdx = "$" + (formattedSql.values.length + 2);
 
     console.log("deleting....");
 
@@ -245,8 +250,8 @@ class Invoice {
                              (user_id, invoice_id, index, description, rate, quantity)
                               VALUES($1,$2,$3,$4,$5,$6)`;
         await db.query(itemQuery, [
-          +data.userId,
-          +data.id,
+          data.userId,
+          data.id,
           +indexCount,
           item.description,
           +item.rate,
@@ -258,31 +263,30 @@ class Invoice {
 
     const querySql = `UPDATE invoices
                       SET ${formattedSql.setCols} 
-                      WHERE user_id = ${userIdx} AND code = ${codeIdx}
+                      WHERE user_id = ${userIdx} AND id = ${idIdx}
                       RETURNING id, user_id AS "userId", code, name, address,
                       client_name AS "clientName", client_address AS "clientAddress", 
                       client_email as "clientEmail", created_at as "createdAt", date, 
                       due_date AS "dueDate", status, total`;
     const result = await db.query(querySql, [
       ...formattedSql.values,
-      +userId,
-      code,
+      userId,
+      id,
     ]);
     const invoice = result.rows[0];
 
     if (!invoice) throw new NotFoundError(`No user: ${userId}`);
 
     invoice.items = currItems || [];
-    // filteredInv = invoice.filter((row) => row != "items");
-    // console.log("returning invoice without items? -> ", filteredInv);
+
     return invoice;
   }
 
-  static async remove(userId, invoiceCode) {
-    if (userId && invoiceCode) {
+  static async remove(userId, id) {
+    if (userId && id) {
       await db.query(`DELETE from invoices WHERE user_id = $1 AND code = $2`, [
-        +userId,
-        invoiceCode,
+        userId,
+        id,
       ]);
     }
   }
@@ -297,8 +301,8 @@ class Invoice {
                             RETURNING index, user_id AS "userId", invoice_id AS "invoiceId", description, rate, quantity`;
         const itemRes = await db.query(itemQuery, [
           indexCount + 1,
-          +userId,
-          +invoiceId,
+          userId,
+          invoiceId,
           item.description,
           +item.rate,
           +item.quantity,
@@ -326,7 +330,7 @@ class Invoice {
     const itemsRes = result.rows;
     return itemsRes;
   }
-  static async patchItems(userId, invoiceId, items) {
+  static async patchItems(userId, invoiceId) {
     const itemQuery = `SELECT (user_id AS "userId", invoice_id AS "invoiceId",
                               description, rate, quantity)
                         FROM items
@@ -335,6 +339,20 @@ class Invoice {
     const result = await db.query(itemQuery, [userId, invoiceId]);
     const itemsRes = result.rows;
     return itemsRes;
+  }
+
+  static async send(userId, invoiceId, msg) {
+    if (userId && invoiceId)
+      try {
+        console.log("sendgridapi", process.env.SEND_GRID_API_KEY);
+        await sgMail.send(msg);
+      } catch (error) {
+        console.error(error);
+
+        if (error.response) {
+          console.error(error.response.body);
+        }
+      }
   }
 }
 

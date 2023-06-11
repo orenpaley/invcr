@@ -13,8 +13,18 @@ import {
 } from "./initialValues";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
+import { useNavigate, Navigate } from "react-router-dom";
 
-import { Container, Row, Col, Table, Form, Label, Button } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Form,
+  Label,
+  Input,
+  Button,
+} from "reactstrap";
 
 import EditableField, { EditableTextArea } from "../../helpers/EditableField";
 
@@ -30,8 +40,10 @@ const Invoice = ({ data, clients = null }) => {
     to: "",
     from: "noreply@invcr.io",
     subject: "INVCR Invoice Incoming",
-    html: `Click the link below to view the PDF preview:<br/><a href="http://localhost:3000/client-invoice/${user.id}/${values.id}">download</a>`,
+    html: `Click the link below to view the PDF preview:<br/><a href="http://localhost:3000/client-invoice/${user.id}/${data.id}">download</a>`,
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let itemsTotal = 0;
@@ -93,7 +105,7 @@ const Invoice = ({ data, clients = null }) => {
     const invoiceCheck = async () => {
       let isSaved = null;
       try {
-        isSaved = await LobsterApi.getInvoice(user.id, values.id);
+        isSaved = await LobsterApi.getInvoice(user.id, values.code);
       } catch (e) {
         isSaved = null;
       } finally {
@@ -105,7 +117,7 @@ const Invoice = ({ data, clients = null }) => {
     const saveInvoice = async () => {
       if (isInvoice) {
         try {
-          await LobsterApi.patchInvoice(user.id, values.id, values);
+          await LobsterApi.patchInvoice(user.id, values.code, values);
         } catch (error) {
           setError("Failed to update invoice. Please try again."); // Set the error message
         }
@@ -132,7 +144,6 @@ const Invoice = ({ data, clients = null }) => {
       if (i === index) {
         const newItem = { ...item };
         setSubtotal(subtotal + newItem.rate * newItem.quantity);
-        values.subtotal = subtotal;
         newItem[value.target.name] = value.target.value;
         return newItem;
       }
@@ -172,7 +183,7 @@ const Invoice = ({ data, clients = null }) => {
   const getItems = () => {
     let items = values.items;
     let itemArr = [];
-
+    Input("items??? for download", items);
     items.forEach((item) => {
       let vals = Object.values(item);
       itemArr.push([vals.map((v) => String(v))]);
@@ -218,16 +229,14 @@ const Invoice = ({ data, clients = null }) => {
     doc.text(values.dueDate, 150, 71);
 
     const items = getItems();
-    const sliced = [];
     for (let item of items) {
-      item[6] = +item[4] * +item[5];
-      sliced.push(item.slice(3));
+      item[3] = +item[1] * +item[2];
     }
 
     autoTable(doc, {
       startY: 80,
       head: [["Description", "Rate", "Quantity", "Total"]],
-      body: [...sliced],
+      body: [...items],
     });
     let finalY = doc.previousAutoTable.finalY;
 
@@ -806,7 +815,7 @@ const Invoice = ({ data, clients = null }) => {
                   handleClose={handleClose}
                   id={user.id}
                   msg={msg}
-                  invoiceId={values.id}
+                  invoiceId={values.invoiceId}
                 />
               </>
             ) : (

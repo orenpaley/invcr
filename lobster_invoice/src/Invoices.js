@@ -106,8 +106,7 @@ const Invoices = () => {
     e.preventDefault();
     const invoiceCode = e.target.dataset.id;
     try {
-      console.log("invoice id", invoiceCode);
-      const data = await LobsterApi.getInvoice(user.id, invoiceCode);
+      const data = await LobsterApi.getInvoice(user.id, +invoiceCode);
       navigate("/", { state: data });
     } catch (error) {
       console.error("Error opening invoice:", error);
@@ -138,7 +137,7 @@ const Invoices = () => {
     const { name, value } = e.target;
     try {
       await LobsterApi.patchInvoice(user.id, name, { status: value });
-
+      Input(`Status updated for ${name}: ${value}`);
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
         [name]: value,
@@ -151,9 +150,9 @@ const Invoices = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    const invoiceId = e.target.dataset.id;
+    const invoiceCode = e.target.value;
     try {
-      await LobsterApi.deleteInvoice(user.id, invoiceId);
+      await LobsterApi.deleteInvoice(user.id, invoiceCode);
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }
@@ -175,13 +174,13 @@ const Invoices = () => {
           {invoices.map((invoice) => (
             <tr key={invoice.id}>
               <th
-                value={invoice.code}
+                value={invoice.id}
                 data-id={invoice.id}
                 onClick={handleOpenInvoice}
                 scope="row"
                 style={{ color: "white" }}
               >
-                INVOICE {invoice.code}
+                INVOICE {invoice.id}
               </th>
               <td>{invoice.clientName}</td>
               <td>

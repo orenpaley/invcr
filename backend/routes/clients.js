@@ -7,6 +7,8 @@ const { ensureCorrectUserOrAdmin, ensureAdmin } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const Client = require("../models/client");
 
+const Invoice = require("../models/invoice");
+
 const router = express.Router();
 
 /** POST / => { client: [ data ] }
@@ -84,5 +86,13 @@ router.patch(
     }
   }
 );
-
+// get invoice for client
+router.get("/:invoiceId", async function (req, res, next) {
+  try {
+    const invoice = await Invoice.open(req.params.userId, req.params.code);
+    return res.json({ invoice });
+  } catch (err) {
+    return next(err);
+  }
+});
 module.exports = router;
