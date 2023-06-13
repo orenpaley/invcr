@@ -21,7 +21,6 @@ const EditableField = ({
         onChange={onChange}
         type={type}
         value={value}
-        style={style}
       />
     );
   }
@@ -52,7 +51,7 @@ const EditableTextArea = ({
         id={id}
         placeholder={placeholder}
         name={name}
-        className={className}
+        className={className + " " + "text-area"}
         onChange={onChange}
         type={type}
         value={value || "test"}

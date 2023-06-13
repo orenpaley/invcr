@@ -27,9 +27,9 @@ VALUES (user1_id,
 
 INSERT INTO invoices (id, code, user_id, email, name, address, 
                 client_name, client_address, client_email, date, due_date, 
-                payment_terms, tax_rate, total, currency)
+                payment_terms, tax_rate, subtotal, total, currency)
 VALUES (invoice1_id, 'OP-001', user1_id, 'test@test.com', 'Oren Paley', '12345 test st, anytown AA, 12345', 'VIP', '157 Test VIP st, atown, TN, 22222',
-      'test@tester.com', '2023-04-11','2023-05-11', 'net30', 0, 1600, 'USD');
+      'test@tester.com', '2023-04-11','2023-05-11', 'net30', 0, 1600, 1600, 'USD');
 
 INSERT INTO items (index, user_id, invoice_id, description, rate, quantity)
 VALUES (1, user1_id, invoice1_id, 'item description 1', 50, 8),

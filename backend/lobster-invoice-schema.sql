@@ -43,6 +43,7 @@ CREATE TABLE invoices (
   "terms" text,
   "notes" text,
   "tax_rate" decimal DEFAULT 0,
+  "subtotal" decimal DEFAULT 0,
   "total" decimal DEFAULT 0,
   "currency" varchar(5),
   "status" varchar(50),

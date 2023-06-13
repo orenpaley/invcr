@@ -36,8 +36,10 @@ function App() {
         <div
           className="App"
           style={{
-            backgroundImage: `url(${background})`,
-            backgroundColor: "red",
+            // backgroundImage: `url(${background})`,
+            backgroundColor: "whitesmoke",
+            height: "100%",
+            width: "100%",
           }}
         >
           <Navigation />

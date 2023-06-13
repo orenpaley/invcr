@@ -19,6 +19,7 @@ function Login() {
   return (
     <div className="login-page">
       <LoginForm
+        className="login-form"
         handleChange={handleLoginChange}
         user={context}
         setUser={setContext}

@@ -1,10 +1,43 @@
 .login-page {
-  width: 210mm;
-  margin: auto;
+  height: 100vh;
   padding: 35px;
 }
 
+.login-form {
+  width: 60vh !important;
+  margin: auto !important;
+  padding: 35px;
+}
 
-form {
+form .login-form {
   justify-content: space-around;
+  width: 50vh;
+  border: 2px black solid;
+  background-color: lightpink;
+  margin: auto;
+}
+
+.flex-container-login {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 80vh;
+  margin: auto;
+
+}
+
+.login-button {
+ width: 90px !important;
+ height: 40px;
+ border: 1px black solid !important;
+ background: lightblue !important;
+}
+
+.login-input {
+  width: 100%;
+  margin: auto;
+}
+
+.login-field {
+  margin: auto;
 }

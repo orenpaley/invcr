@@ -1,11 +1,28 @@
-.container-box {
-  font-size: 18px !important;
-  padding: 15px !important;
-  
+p {
+  font-size: 14px !important;
+}
+ .container {
+  padding: 12px 60px 60px 60px  !important;
+ }
+
+.invoice-form {
+  border: 1px solid black;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background-color: whitesmoke;
+  min-width: 600px;
+
+
+}
+
+.error-msg {
+  height: 24px;
+  margin:auto;
 }
 
 .form-control {
-  font-size: 16px !important;
+  font-size: 14px !important;
   margin: 0;
   border: 0 !important;
   background-color: #FFE2E2 !important;
@@ -25,24 +42,42 @@
 .heading {
   margin: 0;
   padding: 0;
-  padding-right: 24px;
+
+}
+
+.invoice-sub-header {
+  font-size: 16px;
+  font-weight: 700;
 }
 .form-group { margin-bottom: .3rem; }
-h4 {
-  font-size: 14px;
-}
+
 
 .group {
 
   border: 0;
+  font-size: 14px;
+  width: 90%;
 }
 
+.invoice-details-field {
+  margin-top: 16px;
+
+}
+
+.code-field {
+  max-width: fit-content;
+  display: block;
+}
+.code-field input {
+  max-width: 120px;
+  display: block;
+}
 .titleInput {
   border: 3px solid black !important;
   min-width: 48mm;
 
   max-inline-size: 30%;
-  font-size: 44px !important;
+  font-size: 16px ;
   font-weight: 700 !important;
   background-color: white !important;
   text-align: center !important;
@@ -57,8 +92,8 @@ h4 {
   color: white !important;
   text-shadow: -1px 0px 4px rgba(196, 175, 237, 0.912);
   width: 8em;
-  font-size: 18px !important;
-  border-radius: 25px !important;
+  font-size: 14px !important;
+  border-radius: 18px !important;
 }
 
 input, Input, textarea {
@@ -67,18 +102,12 @@ input, Input, textarea {
   border: 0;
   transition: transform 350ms !important;
   max-width: fit-content;
-  
-
 }
 input, Input, textarea {
-  background-color: yellow !important;
-  border: 1px black solid !important;
+  /* background-color: yellow !important; */
   max-width: fit-content;
   margin-right: 3px !important;
-}
-
-Input {
-  background-color: #FFE2E2;
+  background-color: inherit;
 }
 
 label {
@@ -86,16 +115,30 @@ label {
   margin: 0;
   border: 0
 
+}
 
+.text-area {
+  background-color: inherit;
 }
 
 .itemTable {
+  margin: auto;
   margin-top: 8px;
+  width: 50% !important;
 }
 
-td {
-  border: 1px black solid !important;
+.itemTable input {
+  width: 60px;
 }
+
+
+form .invoice-field-box {
+  padding: 25px;
+}
+form {
+  padding: 25px;
+}
+
 
 .add {
   font-size: 22px;
@@ -136,7 +179,9 @@ p {
 button {
   padding: 0;
   margin: 0;
-  height: 60px;
-
 }
 
+
+#taxRate {
+  max-width: 24px !important;
+}

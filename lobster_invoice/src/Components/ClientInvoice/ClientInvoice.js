@@ -28,7 +28,6 @@ const ClientInvoice = ({ url }) => {
     values.items.forEach((item) => {
       console.log("item", +item.rate, +item.quantity);
       setSubtotal((subtotal) => (subtotal += +item.rate * +item.quantity));
-      console.log("subtotal", subtotal);
     });
   }
 

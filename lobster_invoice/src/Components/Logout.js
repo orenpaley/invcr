@@ -9,7 +9,7 @@ const Logout = () => {
   const navigate = useNavigate();
   localStorage.clear();
   LobsterApi.token = null;
-  setContext(null);
+  setContext({});
   navigate("/", { state: initialValues });
 };
 
