@@ -1,21 +1,28 @@
 import LobsterApi from "../../API/api";
 // import "./Login.css";
 import { useNavigate } from "react-router-dom";
+import { initialValues } from "../Invoice/initialValues";
 
 import "./Login.css";
 
 function LoginForm({ handleChange, user, setUser }) {
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+
     const loggedInUser = await LobsterApi.login(
       e.target.email.value,
       e.target.password.value
     );
-    setUser(loggedInUser);
-    localStorage.setItem("curr", JSON.stringify(loggedInUser));
-    return;
+    try {
+      setUser(loggedInUser);
+      localStorage.setItem("curr", JSON.stringify(loggedInUser));
+      user.items ? (user.items = user.items) : setUser({ ...user, items: [] });
+      navigate("/", { state: initialValues });
+    } catch (e) {
+      console.error(e);
+    }
   };
   return (
     <form

@@ -16,6 +16,7 @@ const ItemTable = ({
         size="lg"
         hover
         borderless
+        striped
         className="itemTable"
         style={{ fontSize: "14px", minWidth: "550px" }}
       >
@@ -52,6 +53,7 @@ const ItemTable = ({
                     value={Number(item.quantity)}
                     onChange={(value) => handleItemChange(i, "quantity", value)}
                     editMode={editMode}
+                    min={0}
                   />
                 </td>
                 <td>
@@ -63,6 +65,7 @@ const ItemTable = ({
                     value={Number(item.rate)}
                     onChange={(value) => handleItemChange(i, "rate", value)}
                     editMode={editMode}
+                    min={0}
                   />
                 </td>
                 <td>
@@ -113,7 +116,7 @@ const ItemTable = ({
             className="add"
             style={{
               fontSize: "22px",
-              backgroundColor: "lightgreen",
+              backgroundColor: "#198754",
               textAlign: "center",
               margin: "8px",
               padding: "6px 16px",

@@ -3,7 +3,7 @@ import EditableField, { EditableTextArea } from "../../helpers/EditableField";
 const ClientDetails = ({
   values,
   handleClientChange,
-  clients = [],
+  clients,
   editMode,
   handleChange,
   user,
@@ -12,7 +12,7 @@ const ClientDetails = ({
     <div>
       <p className="invoice-sub-header">To</p>
       <Col>
-        {editMode && user.userId && clients ? (
+        {editMode && user.id && clients ? (
           <select
             className="form-select"
             aria-label="Default select example"

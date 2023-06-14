@@ -10,6 +10,7 @@ const EditableField = ({
   type,
   editMode,
   style,
+  min,
 }) => {
   if (editMode) {
     return (
@@ -21,6 +22,7 @@ const EditableField = ({
         onChange={onChange}
         type={type}
         value={value}
+        min={min}
       />
     );
   }
@@ -54,7 +56,7 @@ const EditableTextArea = ({
         className={className + " " + "text-area"}
         onChange={onChange}
         type={type}
-        value={value || "test"}
+        value={value}
         style={style}
       />
     );

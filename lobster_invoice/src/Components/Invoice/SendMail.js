@@ -10,7 +10,6 @@ const SendMail = ({ showModal, handleClose, id, invoiceId, msg }) => {
   const handleSend = async (e) => {
     // Perform send email logic here
     e.preventDefault();
-    console.log("INVOICE ID ========>>>>>>>>>>>>>>>>>>>>>>", invoiceId);
     msg.subject = subject || "INVCR Invoice Incoming";
     msg.to = recipient || false;
     msg.html = message + "<br />" + msg.html;

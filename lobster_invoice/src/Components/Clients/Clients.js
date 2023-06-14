@@ -45,7 +45,7 @@ const Clients = () => {
         {clients.map((client, index) => (
           <tr key={index}>
             <td>
-              <NavLink to="/client" state={{ client }}>
+              <NavLink to="/client" state={{ client }} user={user}>
                 {client.name}
               </NavLink>
             </td>

@@ -7,6 +7,7 @@ p {
 
 .invoice-form {
   border: 1px solid black;
+  min-width: 700px !important;
   width: auto;
   height: auto;
   margin: 0;
@@ -96,6 +97,8 @@ p {
   border-radius: 18px !important;
 }
 
+
+
 input, Input, textarea {
   padding: 0 !important;
   margin: 0 !important;
@@ -108,7 +111,28 @@ input, Input, textarea {
   max-width: fit-content;
   margin-right: 3px !important;
   background-color: inherit;
+  min-height: 24px;
 }
+
+input:hover, Input:hover, textarea:hover {
+  background-color: #FFE2E2 !important;
+  transition: 400ms !important;
+}
+
+.total, .subtotal {
+  max-width: fit-content;
+  text-align: right;
+  margin-left: auto;
+}
+
+.total:hover, .subtotal:hover {
+  background-color: aquamarine;
+
+  transition: 400ms ;
+
+  
+}
+
 
 label {
   padding: 0;
@@ -155,14 +179,15 @@ form {
 
 
 .remove {
-  padding: 0;
-  background-color: red;
-  margin: 50% 5px;
+  padding: 16px !important;
+  vertical-align: middle;
+  
 
 }
 
 .remove:hover {
-  background-color: darkred !important;
+  background-color: rgb(174, 20, 20) !important;
+  color: white !important;
 }
 
 .errorMsg {
@@ -183,5 +208,6 @@ button {
 
 
 #taxRate {
-  max-width: 24px !important;
+  max-width: 48px !important;
+  text-align: right;
 }

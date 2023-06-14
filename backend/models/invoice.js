@@ -73,7 +73,7 @@ class Invoice {
           currency, 
           status)
         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
-        RETURNING user_id AS "userId", client_id AS "clientId", code, email, name, address, logo, client_name AS "clientName", client_address AS "clientAddress", 
+        RETURNING id, user_id AS "userId", client_id AS "clientId", code, email, name, address, logo, client_name AS "clientName", client_address AS "clientAddress", 
         client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "Input", 
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", subtotal, total, currency, status`,
 
@@ -121,7 +121,6 @@ class Invoice {
     }
 
     invoice.items = newItems;
-    console.log("invoice values", invoice);
 
     return invoice;
   }

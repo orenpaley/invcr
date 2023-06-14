@@ -22,7 +22,17 @@ import { Container, Row, Col, Table, Form, Label, Button } from "reactstrap";
 
 import EditableField, { EditableTextArea } from "../../helpers/EditableField";
 
+import { BiDownload } from "react-icons/bi";
+import { FaSave } from "react-icons/fa";
+import {
+  RiDeleteBin3Fill,
+  RiEditBoxLine,
+  RiEditBoxFill,
+  RiMailSendLine,
+} from "react-icons/ri";
+
 const Invoice = ({ data, clients = null }) => {
+  console.log("invoice data", data);
   const [values, setValues] = useState(data || initialValues);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(null);
@@ -77,7 +87,7 @@ const Invoice = ({ data, clients = null }) => {
   const handleClientChange = (e) => {
     e.preventDefault();
 
-    const client = clients.find((c) => +c.id === +e.target.value);
+    const client = clients.find((c) => c.id === e.target.value);
 
     setValues({
       ...values,
@@ -115,6 +125,7 @@ const Invoice = ({ data, clients = null }) => {
         }
       } else {
         try {
+          console.log("invoice values on save!!!!!!!", values);
           await LobsterApi.saveInvoice(user.id, values);
         } catch (error) {
           setError("Log in to save.");
@@ -297,6 +308,7 @@ const Invoice = ({ data, clients = null }) => {
                   }}
                 >
                   <BillingDetails
+                    user={user}
                     values={values}
                     editMode={editMode}
                     handleChange={handleChange}
@@ -332,7 +344,7 @@ const Invoice = ({ data, clients = null }) => {
                       className="add"
                       style={{
                         fontSize: "22px",
-                        backgroundColor: "lightgreen",
+                        backgroundColor: "#198754",
                         textAlign: "center",
                         margin: "8px",
                         padding: "6px 16px",
@@ -386,7 +398,7 @@ const Invoice = ({ data, clients = null }) => {
                   <strong>
                     <Label for="subtotal">Subtotal</Label>
                   </strong>
-                  <div>{subtotal}</div>
+                  <div className="subtotal">{subtotal}</div>
                 </div>
                 <div className="group">
                   <strong>
@@ -409,7 +421,7 @@ const Invoice = ({ data, clients = null }) => {
                       Total
                     </Label>
                   </strong>
-                  <div>{total}</div>
+                  <div className="total">{total}</div>
                 </div>
               </Col>
             </Row>
@@ -423,26 +435,48 @@ const Invoice = ({ data, clients = null }) => {
             marginLeft: "36px",
           }}
         >
-          <Button className="btn btn-info downloadBtn" onClick={generatePdf}>
+          <BiDownload onClick={generatePdf} style={{ fontSize: "24px" }} />
+          {/* <Button className="btn btn-info downloadBtn" >
             Download
-          </Button>
-          <Button className="btn btn-warning saveBtn" onClick={handleSave}>
+          </Button> */}
+          <FaSave onClick={handleSave} style={{ fontSize: "24px" }} />
+          {/* <Button className="btn btn-warning saveBtn" onClick={handleSave}>
             Save
-          </Button>
-          <Button className="btn btn-secondary saveBtn" onClick={handleClear}>
+          </Button> */}
+          {/* <Button className="btn btn-secondary saveBtn" onClick={handleClear}>
             Clear
-          </Button>
-          <Button
+          </Button> */}
+
+          <RiDeleteBin3Fill
+            onClick={handleClear}
+            style={{ fontSize: "24px" }}
+          />
+          {editMode ? (
+            <RiEditBoxFill
+              onClick={handleToggleEditMode}
+              style={{ fontSize: "24px" }}
+            />
+          ) : (
+            <RiEditBoxLine
+              onClick={handleToggleEditMode}
+              style={{ fontSize: "24px" }}
+            />
+          )}
+          {/* <Button
             className="btn btn-success saveBtn"
             onClick={handleToggleEditMode}
           >
             View/Edit
-          </Button>
+          </Button> */}
           {user.id ? (
             <>
-              <button className="btn btn-primary" onClick={handleOpen}>
+              {/* <button className="btn btn-primary" onClick={handleOpen}>
                 Send
-              </button>
+              </button> */}
+              <RiMailSendLine
+                onClick={handleOpen}
+                style={{ fontSize: "24px" }}
+              />
               <SendMail
                 showModal={showModal}
                 handleClose={handleClose}

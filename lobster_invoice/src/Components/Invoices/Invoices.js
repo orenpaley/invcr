@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Table, Button } from "reactstrap";
+import { Table, Button, NavLink } from "reactstrap";
 import Chart from "./Chart";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
@@ -22,6 +22,7 @@ const Invoices = () => {
       try {
         const fetchedInvoices = await LobsterApi.getInvoices(user.id);
         setInvoices(fetchedInvoices);
+        console.log("invoices fetched", invoices);
       } catch (error) {
         console.error("Error fetching invoices:", error);
       }
@@ -105,10 +106,12 @@ const Invoices = () => {
   const handleOpenInvoice = async (e) => {
     e.preventDefault();
     const invoiceCode = e.target.dataset.id;
+    console.log("id????", e.target.dataset.id);
     try {
       console.log("invoice id", invoiceCode);
       const data = await LobsterApi.getInvoice(user.id, invoiceCode);
-      navigate("/", { state: data });
+      console.log("INVOICE DATA FETCHED", data);
+      navigate("/", { state: { ...data, items: data.items } });
     } catch (error) {
       console.error("Error opening invoice:", error);
     }
@@ -151,7 +154,7 @@ const Invoices = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    const invoiceId = e.target.dataset.id;
+    const invoiceId = e.target.id;
     try {
       await LobsterApi.deleteInvoice(user.id, invoiceId);
     } catch (error) {
@@ -174,14 +177,20 @@ const Invoices = () => {
         <tbody>
           {invoices.map((invoice) => (
             <tr key={invoice.id}>
-              <th
-                value={invoice.code}
-                data-id={invoice.id}
-                onClick={handleOpenInvoice}
-                scope="row"
-                style={{ color: "white" }}
-              >
-                INVOICE {invoice.code}
+              <th>
+                <p
+                  name="id"
+                  value={invoice.id}
+                  data-id={invoice.id}
+                  onClick={handleOpenInvoice}
+                  scope="row"
+                  style={{
+                    cursor: "pointer",
+                    borderBottom: "3px solid aquamarine",
+                  }}
+                >
+                  INVOICE {invoice.code}
+                </p>
               </th>
               <td>{invoice.clientName}</td>
               <td>

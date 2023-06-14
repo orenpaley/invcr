@@ -12,7 +12,7 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
           margin: "0",
           padding: "0",
           marginRight: "auto",
-          minWidth: "300px",
+          minWidth: "330px",
         }}
       >
         <thead>
