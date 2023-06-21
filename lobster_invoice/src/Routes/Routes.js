@@ -15,8 +15,6 @@ import ClientInvoice from "../Components/ClientInvoice/ClientInvoice";
 import { useLocation } from "react-router-dom";
 
 function LobsterRoutes() {
-  const location = useLocation();
-
   return (
     <div>
       <Routes>

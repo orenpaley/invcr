@@ -1,35 +1,48 @@
 import LobsterApi from "../../API/api";
 // import "./Login.css";
 import { useNavigate } from "react-router-dom";
-import { initialValues } from "../Invoice/initialValues";
+import { initialValuesClear } from "../Invoice/initialValues";
+import { useState, useEffect, useContext } from "react";
+import userContext from "../../userContext";
 
 import "./Login.css";
 
-function LoginForm({ handleChange, user, setUser }) {
+function LoginForm({ handleChange }) {
   const navigate = useNavigate();
+  const [context, setContext] = useContext(userContext);
+  const [isLogged, setIsLogged] = useState(false);
+
+  useEffect(() => {
+    if (context.user) setIsLogged(true);
+  }, [context.user]);
+
+  useEffect(() => {
+    navigateIfLogged();
+  }, [isLogged]);
+
+  const navigateIfLogged = () => {
+    if (isLogged) {
+      navigate("/", { state: initialValuesClear });
+      setIsLogged(false);
+    }
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    const loggedInUser = await LobsterApi.login(
+    const { token, user } = await LobsterApi.login(
       e.target.email.value,
       e.target.password.value
     );
     try {
-      setUser(loggedInUser);
-      localStorage.setItem("curr", JSON.stringify(loggedInUser));
-      user.items ? (user.items = user.items) : setUser({ ...user, items: [] });
-      navigate("/", { state: initialValues });
+      setContext({ token, user });
     } catch (e) {
       console.error(e);
     }
   };
+
   return (
-    <form
-      onSubmit={handleLoginSubmit}
-      className="row g-3 needs-validation login-form"
-      noValidate
-    >
+    <form onSubmit={handleLoginSubmit} className="login-form">
       <div className="flex-container-login">
         <div className="login-field">
           <label htmlFor="email" className="form-label">

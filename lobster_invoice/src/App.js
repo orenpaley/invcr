@@ -7,28 +7,27 @@ import LobsterRoutes from "./Routes/Routes";
 import LobsterApi from "./API/api";
 import userContext from "./userContext";
 
-import background from "./starrysky.jpeg";
+// import background from "./starrysky.jpeg";
 
 function App() {
-  const [context, setContext] = useState({});
-  const [token, setToken] = useState(
-    localStorage.getItem("token") || { token: null }
-  );
-
+  const [context, setContext] = useState(false);
   useEffect(() => {
     const getLoggedUser = async () => {
       if (localStorage.getItem("curr")) {
         setContext(JSON.parse(localStorage.getItem("curr")));
-      } else if (token) {
-        LobsterApi.token = token;
-        const loggedInUser = await LobsterApi.getUser(context.userId);
-        setContext(loggedInUser);
       } else {
-        setContext(false);
+        setContext({ user: null, token: null });
       }
     };
     getLoggedUser();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("curr")
+      ? localStorage.getItem("curr").token
+      : null;
+    LobsterApi.token = token;
+  }, [context.token]);
 
   return (
     <BrowserRouter>

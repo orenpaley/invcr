@@ -20,6 +20,12 @@ router.post("/token", async function (req, res, next) {
     const { email, password } = req.body;
     const user = await User.authenticate(email, password);
     const token = createToken(user);
+    // res.cookie("user", user.id, {
+    //   secure: false,
+    //   httpOnly: true,
+    //   sameSite: "lax",
+    // });
+    // res.send("Cookie saved successfully");
     return res.json({ token, user });
   } catch (err) {
     return next(err);
@@ -43,7 +49,7 @@ router.post("/register", async function (req, res, next) {
     //   throw new BadRequestError(errs);
     // }
 
-    const newUser = await User.register({ ...req.body, isAdmin: false });
+    const newUser = await User.register({ ...req.body });
     const token = createToken(newUser);
     return res.status(201).json({ token });
   } catch (err) {

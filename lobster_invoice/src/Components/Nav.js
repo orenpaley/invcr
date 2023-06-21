@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { Nav, NavItem } from "reactstrap";
 import { NavLink } from "react-router-dom";
 import "./Nav.css";
@@ -7,7 +7,7 @@ import userContext from "../userContext";
 function Navigation() {
   const [context, setContext] = useContext(userContext);
 
-  return !context.id ? (
+  return !context.token ? (
     <>
       <Nav>
         <div
@@ -15,32 +15,60 @@ function Navigation() {
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            width: "100%",
+            alignItems: "baseline",
+            padding: "0",
+            margin: "auto",
+            width: "75%",
+            fontSize: "16px !important",
           }}
         >
-          <span
-            style={{ marginLeft: "24px", fontSize: "36px", fontWeight: 600 }}
+          <NavLink
+            to="/"
+            className={(isActive) =>
+              "invcr_logo nav-link" + (!isActive ? " unselected" : "")
+            }
+            style={{
+              marginLeft: "24px",
+              fontSize: "36px",
+              fontWeight: 600,
+            }}
           >
             INVCR
-          </span>
+          </NavLink>
           <div
             style={{
               display: "flex",
               flexDirection: "row",
               justifyContent: "flex-end",
-              gap: "36px",
-              marginRight: "46px",
-              fontSize: "28px",
+              alignItems: "baseline",
+              padding: "0",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginRight: "132px",
+              gap: "60px",
+              width: "100%",
+              fontSize: "16px !important",
             }}
           >
             <NavItem>
-              <NavLink to="/">Home</NavLink>
+              <NavLink
+                className={(isActive) =>
+                  "nav-link" + (!isActive ? " unselected" : "")
+                }
+                to="/login"
+              >
+                Login
+              </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/login">Login</NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink to="/signup">Signup</NavLink>
+              <NavLink
+                className={(isActive) =>
+                  "nav-link" + (!isActive ? " unselected" : "")
+                }
+                to="/signup"
+              >
+                Signup
+              </NavLink>
             </NavItem>
           </div>
         </div>
@@ -54,33 +82,61 @@ function Navigation() {
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            width: "100%",
+            alignItems: "baseline",
+            padding: "0",
+            margin: "auto",
+            width: "75%",
+            fontSize: "16px !important",
           }}
         >
-          <span
-            style={{ marginLeft: "24px", fontSize: "36px", fontWeight: 600 }}
+          <NavLink
+            to="/"
+            className={(isActive) =>
+              "invcr_logo nav-link" + (!isActive ? " unselected" : "")
+            }
+            style={{
+              marginLeft: "24px",
+              fontSize: "36px",
+              fontWeight: 600,
+            }}
           >
             INVCR
-          </span>
+          </NavLink>
+
           <div
             style={{
               display: "flex",
               flexDirection: "row",
               justifyContent: "flex-end",
-              gap: "36px",
+              gap: "60px",
+              alignItems: "baseline",
+              padding: "0",
+              marginTop: "auto",
+              marginBottom: "auto",
               marginRight: "46px",
-              fontSize: "28px",
+              width: "100%",
+              fontSize: "16px !important",
             }}
           >
-            <NavItem className="" style={{ paddingLeft: "24px" }}>
-              <NavLink to="/">Home</NavLink>
-            </NavItem>
-
             <NavItem>
-              <NavLink to="/invoices">Invoices</NavLink>
+              <NavLink
+                className={(isActive) =>
+                  "nav-link" + (!isActive ? " unselected" : "")
+                }
+                to="/invoices"
+              >
+                Invoices
+              </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/clients">Clients</NavLink>
+              <NavLink
+                className={(isActive) =>
+                  "nav-link" + (!isActive ? " unselected" : "")
+                }
+                to="/clients"
+              >
+                Clients
+              </NavLink>
             </NavItem>
             <NavItem>
               <NavLink to="/logout">Logout</NavLink>

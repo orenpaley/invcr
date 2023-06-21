@@ -26,8 +26,7 @@ CREATE TABLE clients (
 CREATE TABLE invoices (
   "id" uuid DEFAULT uuid_generate_v4(),
   "user_id" uuid,
-  "client_id" uuid,
-  "code" varchar(50),
+  "code" varchar(50) UNIQUE,
   "email" varchar(255),
   "name" varchar(255),
   "address" varchar(400),
@@ -48,8 +47,8 @@ CREATE TABLE invoices (
   "currency" varchar(5),
   "status" varchar(50),
   PRIMARY KEY ("id"),
-  FOREIGN KEY ("user_id") REFERENCES users ("id") ON DELETE CASCADE,
-  FOREIGN KEY ("client_id") REFERENCES clients ("id") ON DELETE CASCADE
+  FOREIGN KEY ("user_id") REFERENCES users ("id") ON DELETE CASCADE
+
 );
 
 CREATE TABLE items (

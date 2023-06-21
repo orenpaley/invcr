@@ -10,7 +10,7 @@ function createToken(user) {
   );
 
   let payload = {
-    email: user.email,
+    id: user.id,
     isAdmin: user.isAdmin || false,
   };
 

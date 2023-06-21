@@ -4,39 +4,32 @@ const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
 /** API Class.
  *
- * Static class tying together methods used to get/send to to the API.
- * There shouldn't be any frontend-specific stuff here, and there shouldn't
- * be any API-aware stuff elsewhere in the frontend.
+ * Static class tying together methods used to get/send to the API.
+
  *
  */
 
 class LobsterApi {
-  // the token for interactive with the API will be stored here.
+  // the token for interacting with the API will be stored here.
   static token;
 
   static async request(endpoint, data = {}, method = "get") {
-    console.debug("API Call:", endpoint, data, method);
+    // console.debug("API Call:", endpoint, data, method);
 
-    //there are multiple ways to pass an authorization token, this is how you pass it in the header.
-    //this has been provided to show you another way to pass the token. you are only expected to read this code for this project.
     const url = `${BASE_URL}/${endpoint}`;
     const headers = {
-      Authorization: `Bearer ${
-        LobsterApi.token || localStorage.getItem("token")
-      }`,
+      Authorization: `Bearer ${LobsterApi.token}`,
     };
     const params = method === "get" ? data : {};
 
     try {
       return (await axios({ url, method, data, params, headers })).data;
     } catch (err) {
-      console.error("API Error:", err.response);
+      // console.error("API Error:", err.response);
       let message = err.response.data.error.message;
       throw Array.isArray(message) ? message : [message];
     }
   }
-
-  static token;
 
   // Individual API routes
   // ******** LOGIN
@@ -50,38 +43,32 @@ class LobsterApi {
       "post"
     );
 
-    LobsterApi.token = res.token;
-    localStorage.setItem("token", res.token);
+    LobsterApi.token = res.user.token;
 
-    return res.user;
+    localStorage.setItem("curr", JSON.stringify(res.user));
+
+    return { token: res.token, user: res.user };
   }
   // ******** REGISTER
-  static async register(
-    email,
-    password,
-    firstName,
-    lastName,
-    address,
-    logo,
-    isAdmin
-  ) {
+  static async register(email, password, name, address) {
     let res = await this.request(
       "auth/register",
       {
         email: email,
         password: password,
-        firstName: firstName,
-        lastName: lastName,
+        name: name,
         address: address,
-        logo: logo,
       },
       "post"
     );
+    LobsterApi.token = res.token;
+    localStorage.setItem("token", res.token);
+    localStorage.setItem("user", res.user);
     return res.token;
   }
 
-  static async getUser(userId) {
-    let res = await this.request(`users/${userId}`);
+  static async getUser(id) {
+    let res = await this.request(`users/${id}`);
     return res.user;
   }
 
@@ -114,7 +101,7 @@ class LobsterApi {
 
   static async deleteInvoice(userId, id) {
     let res = await this.request(`invoices/${userId}/${id}`, {}, "delete");
-    return "deleted", res.invoice;
+    return { deleted: res.invoice };
   }
 
   /** Get list of invoices */
@@ -126,8 +113,8 @@ class LobsterApi {
   }
 
   /** add new Client */
-  static async addClient(userId, data) {
-    let res = await this.request(`clients/${userId}`, data, "post");
+  static async addClient(id, data) {
+    let res = await this.request(`clients/${id}`, data, "post");
     return res.client;
   }
 
@@ -145,6 +132,11 @@ class LobsterApi {
 
   static async getClient(userId, clientId) {
     let res = await this.request(`clients/${userId}/${clientId}`);
+    return res.client;
+  }
+
+  static async deleteClient(userId, clientId) {
+    let res = await this.request(`clients/${userId}/${clientId}`, {}, "delete");
     return res.client;
   }
 

@@ -10,7 +10,9 @@ import userContext from "../../userContext";
 const Client = () => {
   let location = useLocation();
   const navigate = useNavigate();
-  const user = useContext(userContext);
+  const [context, setContext] = useContext(userContext);
+  // const [user, setUser] = useState(context.user);
+  const [client, setClient] = useState({});
 
   try {
     const [client, setClient] = useState(location.state.client);
@@ -24,10 +26,8 @@ const Client = () => {
     };
 
     const handleSave = async (e) => {
-      console.log("lOCATION", location.state);
-      console.log("USER", user);
       e.preventDefault();
-      await LobsterApi.updateClient(user[0].id, client.id, {
+      await LobsterApi.updateClient(context.user.id, client.id, {
         name: client.name,
         address: client.address,
         email: client.email,
@@ -63,8 +63,11 @@ const Client = () => {
           />
         </FormGroup>
         <FormGroup>
-          <Label for="address">Address</Label>
-          <Input
+          <div>
+            <Label for="address">Address</Label>
+          </div>
+          <textarea
+            style={{ backgroundColor: "#FFE2E2" }}
             type="text"
             name="address"
             id="address"

@@ -18,25 +18,21 @@ const router = express.Router();
  * Authorization required: curr user/Admin
  **/
 
-router.post(
-  "/:userId",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const client = await Client.save(req.params.userId, req.body);
-      return res.json({ client });
-    } catch (err) {
-      return next(err);
-    }
+router.post("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const client = await Client.save(req.params.id, req.body);
+    return res.json({ client });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 // get Client
 router.get(
-  "/:userId/:id",
+  "/:id/:clientId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      const client = await Client.open(req.params.userId, req.params.id);
+      const client = await Client.open(req.params.id, req.params.clientId);
       return res.json({ client });
     } catch (err) {
       return next(err);
@@ -44,25 +40,21 @@ router.get(
   }
 );
 // get list of clients
-router.get(
-  "/:userId/",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const clients = await Client.findAll(req.params.userId);
-      return res.json({ clients });
-    } catch (err) {
-      return next(err);
-    }
+router.get("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const clients = await Client.findAll(req.params.id);
+    return res.json({ clients });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 router.delete(
-  "/:userId/:id",
+  "/:id/:clientId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      const client = await Client.remove(req.params.userId, req.params.id);
+      const client = await Client.remove(req.params.id, req.params.clientId);
       return res.json({ client });
     } catch (err) {
       return next(err);
@@ -71,13 +63,13 @@ router.delete(
 );
 
 router.patch(
-  "/:userId/:id",
+  "/:id/:clientId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
       const client = await Client.update(
-        req.params.userId,
         req.params.id,
+        req.params.clientId,
         req.body
       );
       return res.json({ client });

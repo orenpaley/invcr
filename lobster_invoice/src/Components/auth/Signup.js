@@ -3,10 +3,14 @@ import userContext from "../../userContext";
 import { useState, useContext } from "react";
 
 function Signup() {
+  const [user, setUser] = useState(userContext);
   return (
-    <div>
-      <SignupForm />
-    </div>
+    <>
+      <SignupForm user={user} setUser={setUser} />
+      <div className="filler">
+        Already registered? <a href="/login">Log In</a>
+      </div>
+    </>
   );
 }
 export default Signup;

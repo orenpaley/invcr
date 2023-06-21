@@ -12,7 +12,7 @@ const ClientDetails = ({
     <div>
       <p className="invoice-sub-header">To</p>
       <Col>
-        {editMode && user.id && clients ? (
+        {editMode && user.id ? (
           <select
             className="form-select"
             aria-label="Default select example"
@@ -20,11 +20,13 @@ const ClientDetails = ({
               handleClientChange(e);
             }}
           >
-            <option default disbled>
+            <option default disabled>
               select client...
             </option>
             {clients.map((client) => (
-              <option value={client.id}>{client.name}</option>
+              <option value={client.id} key={client.id}>
+                {client.name}
+              </option>
             ))}
           </select>
         ) : (
@@ -36,11 +38,13 @@ const ClientDetails = ({
               handleClientChange(e);
             }}
           >
-            <option default disbled>
+            <option default disabled>
               select client...
             </option>
             {clients.map((client) => (
-              <option value={client.id}>{client.name}</option>
+              <option value={client.id} key={client.id}>
+                {client.name}
+              </option>
             ))}
           </select>
         )}
@@ -57,7 +61,7 @@ const ClientDetails = ({
         <EditableField
           id="clientName"
           name="clientName"
-          placeholder="Client Name"
+          placeholder="Name"
           type="text"
           value={values.clientName}
           onChange={handleChange}
@@ -71,7 +75,7 @@ const ClientDetails = ({
         <EditableTextArea
           type="text"
           name="clientAddress"
-          placeholder="client address line 1"
+          placeholder={"address line 1 \naddress line 2\naddress line 3"}
           value={values.clientAddress}
           onChange={handleChange}
           editMode={editMode}
@@ -85,7 +89,7 @@ const ClientDetails = ({
         <EditableField
           id="clientEmail"
           name="clientEmail"
-          placeholder="Client Email"
+          placeholder="Email"
           type="email"
           value={values.clientEmail}
           onChange={handleChange}

@@ -8,7 +8,7 @@ import autoTable from "jspdf-autotable";
 
 import "./ClientInvoice.css";
 
-import { Button } from "reactstrap";
+import { Table, Button } from "reactstrap";
 
 const ClientInvoice = ({ url }) => {
   const location = useLocation();
@@ -23,10 +23,20 @@ const ClientInvoice = ({ url }) => {
     setSubtotalFunc();
   }, [values]);
 
+  const getItems = () => {
+    let items = values.items;
+    let itemArr = [];
+
+    items.forEach((item) => {
+      let vals = Object.values(item);
+      itemArr.push([vals.map((v) => String(v))]);
+    });
+    return itemArr.flat();
+  };
+
   function setSubtotalFunc() {
     setSubtotal(0);
     values.items.forEach((item) => {
-      console.log("item", +item.rate, +item.quantity);
       setSubtotal((subtotal) => (subtotal += +item.rate * +item.quantity));
     });
   }
@@ -77,14 +87,17 @@ const ClientInvoice = ({ url }) => {
     doc.setFont(undefined, "normal");
     doc.text(values.dueDate, 150, 71);
 
-    for (let item of values.items) {
-      item[3] = +item[1] * +item[2];
+    const items = getItems();
+    const sliced = [];
+    for (let item of items) {
+      item.push(+item[4] * +item[5]);
+      sliced.push(item.slice(3));
     }
 
     autoTable(doc, {
       startY: 80,
       head: [["Description", "Rate", "Quantity", "Total"]],
-      body: [...values.items],
+      body: [...sliced],
     });
     let finalY = doc.previousAutoTable.finalY;
 
@@ -127,27 +140,30 @@ const ClientInvoice = ({ url }) => {
         <div>
           {
             <div className="client-invoice">
-              <div className="header">
-                <h1>Invoice</h1>
-                <p>{values.code}</p>
-                <p>Date: {values.date}</p>
-                <p>Due Date: {values.dueDate}</p>
-              </div>
-              <div className="billing-info">
-                <h3>Billing Information</h3>
-                <p>{values.name}</p>
-                <p>{values.address}</p>
-                <p>{values.email}</p>
-              </div>
-              <div className="client-info">
-                <h3>Client Information</h3>
-                <p>{values.clientName}</p>
-                <p>{values.clientAddress}</p>
-                <p>{values.clientEmail}</p>
+              <div className="topcontainer">
+                <div className="subcontainer header">
+                  <h3 className="label">Invoice</h3>
+                  <p>{values.code}</p>
+                  <p>Date: {values.date}</p>
+                  <p>Due Date: {values.dueDate}</p>
+                </div>
+                <div className="subcontainer billing-info">
+                  <h3 className="label">Billing Information</h3>
+                  <p>{values.name}</p>
+                  <p>{values.address}</p>
+                  <p>{values.email}</p>
+                </div>
+
+                <div className="subcontainer client-info">
+                  <h3 className="label">Client Information</h3>
+                  <p>{values.clientName}</p>
+                  <p>{values.clientAddress}</p>
+                  <p>{values.clientEmail}</p>
+                </div>
               </div>
               <div className="items">
-                <h3>Items</h3>
-                <table>
+                <h3 style={{ margin: "auto", textAlign: "center" }}>Items</h3>
+                <Table>
                   <thead>
                     <tr>
                       <th>Description</th>
@@ -166,7 +182,7 @@ const ClientInvoice = ({ url }) => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </Table>
               </div>
               <div className="footer">
                 <p>Subtotal: ${subtotal}</p>

@@ -11,8 +11,11 @@ const usersRoutes = require("./routes/users");
 const invoiceRoutes = require("./routes/invoices");
 const clientRoutes = require("./routes/clients");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const app = express();
+
+app.use(cookieParser());
 
 app.use(cors());
 app.use(express.json());

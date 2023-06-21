@@ -11,8 +11,10 @@ p {
   width: auto;
   height: auto;
   margin: 0;
-  background-color: whitesmoke;
+  background-color: rgba(94, 149, 75, 0.16);
   min-width: 600px;
+  border-radius: 24px;
+
 
 
 }
@@ -210,4 +212,19 @@ button {
 #taxRate {
   max-width: 48px !important;
   text-align: right;
+}
+
+.darktable a {
+  color: #bee1ff !important;
+}
+
+.generateBillingButton:hover {
+  border: 3px darkgreen solid;
+  margin: -2px;
+}
+
+.generateBillingButton {
+  color:  rgb(29, 51, 29) !important;
+  font-size: 12px !important;
+  background-color: inherit !important;
 }

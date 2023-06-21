@@ -11,25 +11,26 @@ const Invoices = () => {
   const [paid, setPaid] = useState(0);
   const [owed, setOwed] = useState(0);
   const [statuses, setStatuses] = useState({});
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("curr")));
+  const [context, setContext] = useContext(userContext);
 
   const [chartData, setChartData] = useState(null);
 
   const [refreshChart, setRefreshChart] = useState(false);
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const fetchedInvoices = await LobsterApi.getInvoices(user.id);
-        setInvoices(fetchedInvoices);
-        console.log("invoices fetched", invoices);
-      } catch (error) {
-        console.error("Error fetching invoices:", error);
-      }
-    };
-
     fetchInvoices();
-  }, [user, paid, owed, statuses]);
+  }, [context, paid, owed, statuses]);
+
+  const fetchInvoices = async () => {
+    try {
+      if (!LobsterApi.token) LobsterApi.token = context.token;
+      const fetchedInvoices = await LobsterApi.getInvoices(context.user.id);
+      let sorted = [...fetchedInvoices].sort((a, b) =>
+        a.code.localeCompare(b.code, "en", { numeric: true })
+      );
+      setInvoices(sorted);
+    } catch (error) {}
+  };
 
   useEffect(() => {
     const calculateTotals = () => {
@@ -87,13 +88,13 @@ const Invoices = () => {
       };
       setChartData(chartData);
     };
-    if (user) {
+    if (context.user) {
       fetchChartData();
       handleRefreshChart();
     }
   }, [paid, owed, statuses]);
 
-  if (!user) {
+  if (!context.user) {
     return <Navigate to="/error-page" replace />;
   }
 
@@ -106,11 +107,8 @@ const Invoices = () => {
   const handleOpenInvoice = async (e) => {
     e.preventDefault();
     const invoiceCode = e.target.dataset.id;
-    console.log("id????", e.target.dataset.id);
     try {
-      console.log("invoice id", invoiceCode);
-      const data = await LobsterApi.getInvoice(user.id, invoiceCode);
-      console.log("INVOICE DATA FETCHED", data);
+      const data = await LobsterApi.getInvoice(context.user.id, invoiceCode);
       navigate("/", { state: { ...data, items: data.items } });
     } catch (error) {
       console.error("Error opening invoice:", error);
@@ -140,7 +138,7 @@ const Invoices = () => {
     e.preventDefault();
     const { name, value } = e.target;
     try {
-      await LobsterApi.patchInvoice(user.id, name, { status: value });
+      await LobsterApi.patchInvoice(context.user.id, name, { status: value });
 
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
@@ -154,9 +152,10 @@ const Invoices = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    const invoiceId = e.target.id;
+    const invoiceId = e.target.value;
     try {
-      await LobsterApi.deleteInvoice(user.id, invoiceId);
+      await LobsterApi.deleteInvoice(context.user.id, invoiceId);
+      fetchInvoices();
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }
@@ -164,7 +163,7 @@ const Invoices = () => {
 
   return (
     <>
-      <Table>
+      <Table hover style={{ maxWidth: "800px", margin: "auto" }}>
         <thead>
           <tr>
             <th>Invoice Code</th>
@@ -172,6 +171,7 @@ const Invoices = () => {
             <th>status</th>
             <th>Date</th>
             <th>Total</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -187,9 +187,10 @@ const Invoices = () => {
                   style={{
                     cursor: "pointer",
                     borderBottom: "3px solid aquamarine",
+                    width: "60px",
                   }}
                 >
-                  INVOICE {invoice.code}
+                  {invoice.code}
                 </p>
               </th>
               <td>{invoice.clientName}</td>
@@ -197,19 +198,27 @@ const Invoices = () => {
                 <select
                   caret
                   name={invoice.id}
-                  value={statuses[invoice.id] || invoice.status}
+                  value={invoice.status}
                   onChange={handleClick}
                 >
-                  {options.map((option) => (
-                    <option value={option.value}>{option.label}</option>
+                  {options.map((option, index) => (
+                    <option key={index} value={option.value}>
+                      {option.label}
+                    </option>
                   ))}
                 </select>
               </td>
-              <td>{invoice.dueDate}</td>
+              <td>{invoice.dueDate.slice(0, 10)}</td>
               <td>{invoice.total}</td>
-              <Button color="danger" onClick={handleDelete} value={invoice.id}>
-                X
-              </Button>
+              <td>
+                <Button
+                  color="danger"
+                  onClick={handleDelete}
+                  value={invoice.id}
+                >
+                  X
+                </Button>
+              </td>
             </tr>
           ))}
           {/* <div>

@@ -21,8 +21,8 @@ function getDatabaseUri() {
 // WJB: Evaluate in 2021 if this should be increased to 13 for non-test use
 const BCRYPT_WORK_FACTOR = process.env.NODE_ENV === "test" ? 1 : 12;
 
-console.log("Lobster Invoice Config:".green);
-console.log("SECRET_KEY:".yellow, SECRET_KEY);
+console.log("invcr Config:".green);
+// console.log("SECRET_KEY:".yellow, SECRET_KEY);
 console.log("PORT:".yellow, PORT.toString());
 console.log("BCRYPT_WORK_FACTOR".yellow, BCRYPT_WORK_FACTOR);
 console.log("Database:".yellow, getDatabaseUri());

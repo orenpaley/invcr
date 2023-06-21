@@ -2,8 +2,15 @@ import LobsterApi from "../../API/api";
 
 import { useState } from "react";
 
-const SendMail = ({ showModal, handleClose, id, invoiceId, msg }) => {
-  const [recipient, setRecipient] = useState("");
+const SendMail = ({
+  showModal,
+  handleClose,
+  id,
+  invoiceId,
+  msg,
+  clientEmail,
+}) => {
+  const [recipient, setRecipient] = useState(clientEmail);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   // send Email with Twillio Send Grid Mail
@@ -17,7 +24,6 @@ const SendMail = ({ showModal, handleClose, id, invoiceId, msg }) => {
       return;
     }
     await LobsterApi.send(id, invoiceId, msg);
-    console.log("msg sent ======>>>>>>>", msg);
     handleClose();
   };
 
@@ -64,8 +70,10 @@ const SendMail = ({ showModal, handleClose, id, invoiceId, msg }) => {
                       type="email"
                       className="form-control"
                       id="recipient"
+                      name="recipient"
                       placeholder="Enter recipient email"
                       onChange={handleChangeRecipient}
+                      value={recipient}
                     />
                   </div>
                   <div className="form-group">

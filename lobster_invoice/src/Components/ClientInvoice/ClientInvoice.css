@@ -2,5 +2,27 @@
   background-color: aliceblue ;
   width: 75%;
   margin: auto;
+
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  
+}
+
+.topcontainer {
+  margin: 0
+ 
+}
+
+.items {
+  align-self: center;
+  min-width: 700px;
+}
+
+
+.label {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
 }

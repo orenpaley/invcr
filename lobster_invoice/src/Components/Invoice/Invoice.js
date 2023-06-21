@@ -10,33 +10,39 @@ import InvoiceDetails from "./InvoiceDetails";
 import BillingDetails from "./BillingDetails";
 import ClientDetails from "./ClientDetails";
 import { useState, useContext } from "react";
-import {
-  initialValues,
-  initialItem,
-  initialValuesClear,
-} from "./initialValues";
+import { initialItem, initialValuesClear } from "./initialValues";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
 
-import { Container, Row, Col, Table, Form, Label, Button } from "reactstrap";
+import {
+  FormGroup,
+  Container,
+  Row,
+  Col,
+  Table,
+  Form,
+  Label,
+  Button,
+  Input,
+} from "reactstrap";
 
 import EditableField, { EditableTextArea } from "../../helpers/EditableField";
 
 import { BiDownload } from "react-icons/bi";
 import { FaSave } from "react-icons/fa";
 import {
-  RiDeleteBin3Fill,
+  RiAddLine,
   RiEditBoxLine,
   RiEditBoxFill,
   RiMailSendLine,
 } from "react-icons/ri";
 
 const Invoice = ({ data, clients = null }) => {
-  console.log("invoice data", data);
-  const [values, setValues] = useState(data || initialValues);
+  const [values, setValues] = useState(data || initialValuesClear);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(null);
-  const [user, setUser] = useContext(userContext);
+  const [context, setContext] = useContext(userContext);
+  const [user, setUser] = useState(context.user || {});
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -48,6 +54,14 @@ const Invoice = ({ data, clients = null }) => {
   });
 
   useEffect(() => {
+    if (context) {
+      if (!LobsterApi.token) {
+        LobsterApi.token = context.token;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     let itemsTotal = 0;
     values.items.forEach((item) => {
       const quantNum = parseFloat(item.quantity);
@@ -56,10 +70,10 @@ const Invoice = ({ data, clients = null }) => {
       itemsTotal += amount;
     });
     setSubtotal(itemsTotal);
-  }, [data, values, total]);
+  }, [values]);
 
   useEffect(() => {
-    let newTotal = subtotal * +values.taxRate + subtotal;
+    let newTotal = subtotal * Math.min(+values.taxRate, 1) + subtotal;
     setTotal(newTotal.toFixed(2));
     values.total = newTotal;
   }, [subtotal, values.taxRate]);
@@ -101,43 +115,64 @@ const Invoice = ({ data, clients = null }) => {
     setEditMode(!editMode);
   };
 
+  const handleGetBillingDetails = (e) => {
+    e.preventDefault();
+    setValues({
+      ...values,
+      name: user.name,
+      email: user.email,
+      address: user.address,
+    });
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
 
     const invoiceCheck = async () => {
-      let isSaved = null;
-      try {
-        isSaved = await LobsterApi.getInvoice(user.id, values.id);
-      } catch (e) {
-        isSaved = null;
-      } finally {
-        return isSaved;
-      }
-    };
-    const isInvoice = await invoiceCheck();
+      const userInvoices = await LobsterApi.getInvoices(user.id);
 
-    const saveInvoice = async () => {
-      if (isInvoice) {
-        try {
-          await LobsterApi.patchInvoice(user.id, values.id, values);
-        } catch (error) {
-          setError("Failed to update invoice. Please try again."); // Set the error message
-        }
-      } else {
-        try {
-          console.log("invoice values on save!!!!!!!", values);
-          await LobsterApi.saveInvoice(user.id, values);
-        } catch (error) {
-          setError("Log in to save.");
-        }
+      for (let invoice of userInvoices) {
+        if (invoice.id == values.id && invoice.code == values.code) return true;
       }
+      return false;
     };
-    saveInvoice();
+
+    if (!user.id) {
+      setError("log in to save");
+    } else {
+      let isInvoice = await invoiceCheck();
+
+      const saveInvoice = async () => {
+        if (values.date > values.dueDate) {
+          setError("due date must be later than date");
+        } else {
+          if (isInvoice) {
+            try {
+              await LobsterApi.patchInvoice(user.id, values.id, values);
+            } catch (error) {
+              setError("Failed to update invoice. Please try again.");
+              // Set the error message
+            }
+          }
+          if (!isInvoice) {
+            try {
+              const saved = await LobsterApi.saveInvoice(user.id, values);
+              if (!values) setValues(saved);
+            } catch (error) {
+              setError("something went wrong");
+            }
+          }
+        }
+      };
+      await saveInvoice();
+    }
   };
 
-  const handleClear = (e) => {
+  const handleNew = (e) => {
     e.preventDefault();
-    setValues(initialValuesClear);
+    if (user.id) handleSave(e);
+
+    setValues({ ...initialValuesClear, id: null });
   };
 
   const handleItemChange = (index, name, value) => {
@@ -176,7 +211,7 @@ const Invoice = ({ data, clients = null }) => {
       {
         ...initialItem,
         index: values.items.length + 1,
-        userId: values.userId,
+        userId: user.id,
         invoiceId: values.id,
       },
     ];
@@ -189,10 +224,14 @@ const Invoice = ({ data, clients = null }) => {
     let itemArr = [];
 
     items.forEach((item) => {
-      let vals = Object.values(item);
-      itemArr.push([vals.map((v) => String(v))]);
+      let newItem = [];
+      newItem[0] = item.description;
+      newItem[1] = item.rate;
+      newItem[2] = item.quantity;
+      newItem[3] = +newItem[1] * +newItem[2];
+      itemArr.push(newItem);
     });
-    return itemArr.flat();
+    return itemArr;
   };
 
   const generatePdf = () => {
@@ -233,16 +272,11 @@ const Invoice = ({ data, clients = null }) => {
     doc.text(values.dueDate, 150, 71);
 
     const items = getItems();
-    const sliced = [];
-    for (let item of items) {
-      item[6] = +item[4] * +item[5];
-      sliced.push(item.slice(3));
-    }
 
     autoTable(doc, {
       startY: 80,
       head: [["Description", "Rate", "Quantity", "Total"]],
-      body: [...sliced],
+      body: [...items],
     });
     let finalY = doc.previousAutoTable.finalY;
 
@@ -307,6 +341,19 @@ const Invoice = ({ data, clients = null }) => {
                     gap: "12px",
                   }}
                 >
+                  {context.user ? (
+                    <span>
+                      <Button
+                        className="generateBillingButton"
+                        onClick={handleGetBillingDetails}
+                      >
+                        Generate Billing Details
+                      </Button>
+                    </span>
+                  ) : (
+                    <span></span>
+                  )}
+
                   <BillingDetails
                     user={user}
                     values={values}
@@ -408,9 +455,17 @@ const Invoice = ({ data, clients = null }) => {
                   <EditableField
                     id="taxRate"
                     name="taxRate"
-                    placeholder="Thank you!"
-                    type="text"
-                    value={values.taxRate}
+                    type="number"
+                    value={
+                      values.taxRate > 1
+                        ? 1
+                        : values.taxRate < 0
+                        ? 0
+                        : values.taxRate
+                    }
+                    step={0.01}
+                    min={0}
+                    max={1}
                     onChange={handleChange}
                     editMode={editMode}
                   />
@@ -435,11 +490,15 @@ const Invoice = ({ data, clients = null }) => {
             marginLeft: "36px",
           }}
         >
+          <RiAddLine onClick={handleNew} style={{ fontSize: "24px" }} />
           <BiDownload onClick={generatePdf} style={{ fontSize: "24px" }} />
           {/* <Button className="btn btn-info downloadBtn" >
             Download
           </Button> */}
-          <FaSave onClick={handleSave} style={{ fontSize: "24px" }} />
+          <FaSave
+            onClick={user ? handleSave : setError("log in to save")}
+            style={{ fontSize: "24px" }}
+          />
           {/* <Button className="btn btn-warning saveBtn" onClick={handleSave}>
             Save
           </Button> */}
@@ -447,10 +506,6 @@ const Invoice = ({ data, clients = null }) => {
             Clear
           </Button> */}
 
-          <RiDeleteBin3Fill
-            onClick={handleClear}
-            style={{ fontSize: "24px" }}
-          />
           {editMode ? (
             <RiEditBoxFill
               onClick={handleToggleEditMode}
@@ -483,6 +538,7 @@ const Invoice = ({ data, clients = null }) => {
                 id={user.id}
                 msg={msg}
                 invoiceId={values.id}
+                clientEmail={values.clientEmail}
               />
             </>
           ) : (

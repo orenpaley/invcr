@@ -17,17 +17,19 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
-      <LoginForm
-        className="login-form"
-        handleChange={handleLoginChange}
-        user={context}
-        setUser={setContext}
-      />
-      <div className="filler">
-        Don't have an account? <a href="/signup">Register</a>
+    <>
+      <div style={{ minHeight: "400px" }}>
+        <LoginForm
+          className="login-form"
+          handleChange={handleLoginChange}
+          context={context}
+          setContext={setContext}
+        />
+        <div className="filler">
+          Don't have an account? <a href="/signup">Register</a>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -17,7 +17,7 @@ class Client {
     const clientQuery = await db.query(
       `INSERT INTO clients (user_id, name, address, email)
           VALUES($1,$2,$3,$4)
-          RETURNING (name, address, email, created_at)`,
+          RETURNING (id, name, address, email, created_at)`,
       [userId, data.name, data.address, data.email]
     );
     return clientQuery.rows[0];
@@ -36,19 +36,6 @@ class Client {
         WHERE user_id = $1`,
       [userId]
     );
-    for (let client of clientsQuery.rows) {
-      const totalQuery = await db.query(
-        `SELECT total 
-           FROM invoices
-           WHERE user_id = $1 AND client_id = $2`,
-        [userId, client.id]
-      );
-      for (let invoice of totalQuery.rows) {
-        if (client.total) client.total += +invoice.total;
-        else client.total = +invoice.total || 0;
-      }
-    }
-
     return clientsQuery.rows;
   }
 
@@ -90,10 +77,10 @@ class Client {
     return client;
   }
 
-  static async remove(userId, id) {
+  static async remove(id, clientId) {
     const delQuery = await db.query(
       `DELETE from clients WHERE user_id = $1 AND id = $2 RETURNING name`,
-      [userId, id]
+      [id, clientId]
     );
     return `deleted Client: ${delQuery.rows[0].name}`;
   }

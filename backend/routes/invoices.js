@@ -17,18 +17,14 @@ const router = express.Router();
  * Authorization required: curr user
  **/
 
-router.post(
-  "/:userId",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const invoice = await Invoice.save(+req.params.userId, req.body);
-      return res.json({ invoice });
-    } catch (err) {
-      return next(err);
-    }
+router.post("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const invoice = await Invoice.save(req.params.id, req.body);
+    return res.json({ invoice });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** GET / => { invoices: [ data ] }
  *
@@ -61,18 +57,14 @@ router.get("/", ensureCorrectUserOrAdmin, async function (req, res, next) {
  * Authorization required: admin or same user-as-:userId
  **/
 
-router.get(
-  "/:userId",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const invoices = await Invoice.findAll(req.params.userId);
-      return res.json({ invoices });
-    } catch (err) {
-      return next(err);
-    }
+router.get("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const invoices = await Invoice.findAll(req.params.id);
+    return res.json({ invoices });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** GET /[userId]/[code] => { invoice }
  *
@@ -83,9 +75,9 @@ router.get(
  **/
 
 // no permission for correct user or admin to allow external clients to view
-router.get("/:userId/:id", async function (req, res, next) {
+router.get("/:id/:invoiceId", async function (req, res, next) {
   try {
-    const invoice = await Invoice.open(req.params.userId, req.params.id);
+    const invoice = await Invoice.open(req.params.id, req.params.invoiceId);
     return res.json({ invoice });
   } catch (err) {
     return next(err);
@@ -103,13 +95,13 @@ router.get("/:userId/:id", async function (req, res, next) {
  **/
 
 router.patch(
-  "/:userId/:id",
+  "/:id/:invoiceId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
       const invoice = await Invoice.update(
-        req.params.userId,
         req.params.id,
+        req.params.invoiceId,
         req.body
       );
       return res.json({ invoice });
@@ -125,12 +117,12 @@ router.patch(
  **/
 
 router.delete(
-  "/:userId/:code",
+  "/:id/:invoiceId",
   ensureCorrectUserOrAdmin,
   async function (req, res, next) {
     try {
-      await Invoice.remove(req.params.userId, req.params.id);
-      return res.json({ deleted: req.params.userId + "-" + req.params.id });
+      await Invoice.remove(req.params.id, req.params.invoiceId);
+      return res.json({ deleted: req.params.invoiceId });
     } catch (err) {
       return next(err);
     }
@@ -140,7 +132,7 @@ router.delete(
 // Route to send invoice via Twilio Send Grid
 
 router.post(
-  "/:userId/:invoiceId/send",
+  "/:id/:invoiceId/send",
 
   async function (req, res, next) {
     try {
@@ -151,7 +143,7 @@ router.post(
         text: req.body.text,
         html: req.body.html,
       };
-      await Invoice.send(req.params.userId, req.params.invoiceId, msgFormatted);
+      await Invoice.send(req.params.id, req.params.invoiceId, msgFormatted);
       return res.json({ sent: req.params.msg });
     } catch (err) {
       return next(err);

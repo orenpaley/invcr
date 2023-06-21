@@ -17,7 +17,6 @@ class Invoice {
   static async save(
     userId,
     {
-      clientId,
       code,
       email,
       name,
@@ -29,13 +28,11 @@ class Invoice {
       date,
       dueDate,
       items,
-      submittedAt,
       terms,
       notes,
       taxRate,
       subtotal,
       total,
-      currency,
       status,
     }
   ) {
@@ -53,33 +50,29 @@ class Invoice {
     let result = await db.query(
       `insert INTO invoices
         (user_id,
-          client_id,
           code,
           email,
           name,
           address, 
-          logo, 
+          logo,
           client_name,
           client_address, 
           client_email, 
           date, 
           due_date,
-          submitted_at, 
           terms, 
           notes, 
           tax_rate, 
           subtotal,
           total, 
-          currency, 
           status)
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
-        RETURNING id, user_id AS "userId", client_id AS "clientId", code, email, name, address, logo, client_name AS "clientName", client_address AS "clientAddress", 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        RETURNING id, user_id AS "userId", code, email, name, address, logo, client_name AS "clientName", client_address AS "clientAddress", 
         client_email AS "clientEmail", created_at AS "createdAt", date, due_date as "dueDate", payment_terms AS "Input", 
         submitted_at AS "submittedAt", terms, notes, tax_rate AS "taxRate", subtotal, total, currency, status`,
 
       [
         userId,
-        clientId,
         code,
         email,
         name,
@@ -90,28 +83,28 @@ class Invoice {
         clientEmail,
         date,
         dueDate,
-        submittedAt,
         terms,
         notes,
         taxRate,
         subtotal,
         total,
-        currency,
         status,
       ]
     );
     const invoice = result.rows[0];
-    // may not need indexCount
+
     const newItems = [];
+    let indexCount = 0;
     for (let item of items) {
       const itemQuery = `INSERT INTO items
-    (userId, invoiceId, index, description, rate, quantity)
+    (user_id, invoice_id, index, description, rate, quantity)
      VALUES($1,$2,$3,$4,$5,$6)
+     RETURNING user_id AS "userId", invoice_id AS "invoiceId", index, description, rate, quantity
        `;
       const itemRes = await db.query(itemQuery, [
-        userId,
-        id,
-        indexCount,
+        invoice.userId,
+        invoice.id,
+        indexCount + 1,
         item.description,
         +item.rate,
         +item.quantity,
@@ -119,7 +112,6 @@ class Invoice {
       newItems.push(itemRes.rows[0]);
       indexCount++;
     }
-
     invoice.items = newItems;
 
     return invoice;
@@ -134,7 +126,7 @@ class Invoice {
 
   static async open(userId, id) {
     const invoiceRes = await db.query(
-      `SELECT id, user_id AS "userId", client_id AS "clientId", code,
+      `SELECT id, user_id AS "userId", code,
               email, name, address, logo, client_name AS "clientName", 
               client_address AS "clientAddress", client_email AS "clientEmail", 
               created_at AS "createdAt", date,  due_date as "dueDate", submitted_at AS "submittedAt", 
@@ -180,6 +172,7 @@ class Invoice {
       const invoicesRes = await db.query(
         `SELECT
                 id,
+                user_id AS "userId",
                 code,
                 name,
                 client_name AS "clientName",
@@ -193,6 +186,7 @@ class Invoice {
     }
     const invoicesRes = await db.query(
       `SELECT id,
+              user_id AS "userId",
                 code,
                 name,
                 client_name AS "clientName",
@@ -227,7 +221,6 @@ class Invoice {
 
     const formattedSql = sqlForPartialUpdate(data, {
       userId: "user_id",
-      clientId: "client_id",
       clientName: "client_name",
       clientAddress: "client_address",
       clientEmail: "client_email",
@@ -239,15 +232,13 @@ class Invoice {
     const userIdx = "$" + (formattedSql.values.length + 1);
     const idIdx = "$" + (formattedSql.values.length + 2);
 
-    console.log("deleting....");
-
     await db.query(`DELETE from items WHERE invoice_id = $1 AND user_id = $2`, [
       data.id,
       data.userId,
     ]);
 
     if (currItems) {
-      let indexCount = 1;
+      let indexCount = 0;
       for (let item of currItems) {
         const itemQuery = `INSERT INTO items
                              (user_id, invoice_id, index, description, rate, quantity)
@@ -255,7 +246,7 @@ class Invoice {
         await db.query(itemQuery, [
           data.userId,
           data.id,
-          +indexCount,
+          indexCount,
           item.description,
           +item.rate,
           +item.quantity,
@@ -282,17 +273,17 @@ class Invoice {
 
     invoice.items = currItems || [];
 
-    console.log("invoice values =====>>>>", invoice);
-
     return invoice;
   }
 
   static async remove(userId, id) {
     if (userId && id) {
-      await db.query(`DELETE from invoices WHERE user_id = $1 AND code = $2`, [
+      await db.query(`DELETE from invoices WHERE user_id = $1 AND id = $2`, [
         userId,
         id,
       ]);
+    } else {
+      console.error("param missing?");
     }
   }
 
@@ -349,7 +340,6 @@ class Invoice {
   static async send(userId, invoiceId, msg) {
     if (userId && invoiceId)
       try {
-        console.log("sendgridapi", process.env.SENDGRID_API_KEY);
         await sgMail.send(msg);
       } catch (error) {
         console.error(error);

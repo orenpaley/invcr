@@ -1,32 +1,61 @@
 .login-page {
-  height: 100vh;
+  min-height: 400px;
   padding: 35px;
+  margin: auto;
+}
+
+.signup_form {
+  width: 500px;
+  margin: auto;
+  margin-top: 60px;
+  padding: 48px;
+  border: 3px black solid;
+  border-radius: 32px;
+  background-color: aliceblue;
 }
 
 .login-form {
-  width: 60vh !important;
-  margin: auto !important;
-  padding: 35px;
-}
-
-form .login-form {
-  justify-content: space-around;
-  width: 50vh;
-  border: 2px black solid;
-  background-color: lightpink;
+  width: 500px;
   margin: auto;
+  margin-top: 60px;
+  padding: 48px;
+  border: 3px black solid;
+  border-radius: 32px;
+  background-color: aliceblue;
 }
 
 .flex-container-login {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  width: 80vh;
-  margin: auto;
+  align-items: center;
 
 }
 
-.login-button {
+
+.signup_inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.signup_input {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+
+.signup_input input, .signup_input textarea {
+  background-color: #FFE2E2;
+  border-radius: 6px;
+  min-width: 200px;
+  /* margin-left: 24px !important; */
+}
+
+.form-label {
+  margin-right: 12px
+}
+
+.login-button, .regis-button {
  width: 90px !important;
  height: 40px;
  border: 1px black solid !important;
@@ -40,4 +69,8 @@ form .login-form {
 
 .login-field {
   margin: auto;
+}
+
+.regis-button, .login-button {
+  margin-top: 24px;
 }

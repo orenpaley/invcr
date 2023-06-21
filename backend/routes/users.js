@@ -62,18 +62,14 @@ router.get("/", ensureAdmin, async function (req, res, next) {
  * Authorization required: admin or same user-as-:email
  **/
 
-router.get(
-  "/:userId",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const user = await User.get(req.params.userId);
-      return res.json({ user });
-    } catch (err) {
-      return next(err);
-    }
+router.get("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const user = await User.get(req.params.id);
+    return res.json({ user });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** PATCH /[email] { user } => { user }
  *

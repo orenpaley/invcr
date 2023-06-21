@@ -11,8 +11,12 @@ const EditableField = ({
   editMode,
   style,
   min,
+  max,
+  step,
 }) => {
   if (editMode) {
+    if (name === "taxRate") {
+    }
     return (
       <input
         id={id}
@@ -23,6 +27,8 @@ const EditableField = ({
         type={type}
         value={value}
         min={min}
+        max={max}
+        step={step}
       />
     );
   }

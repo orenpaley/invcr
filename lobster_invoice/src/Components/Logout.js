@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import LobsterApi from "../API/api";
-import { initialValues } from "./Invoice/initialValues";
+import { initialValuesClear } from "./Invoice/initialValues";
 import { useContext } from "react";
 import userContext from "../userContext";
 
@@ -10,7 +10,7 @@ const Logout = () => {
   localStorage.clear();
   LobsterApi.token = null;
   setContext({});
-  navigate("/", { state: initialValues });
+  navigate("/", { state: initialValuesClear });
 };
 
 export default Logout;

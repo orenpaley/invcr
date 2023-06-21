@@ -31,7 +31,7 @@ const ItemTable = ({
         <tbody>
           {values.items.map((item, i) => {
             return (
-              <tr style={{ marginTop: "60px" }}>
+              <tr key={i} style={{ marginTop: "60px" }}>
                 <td>
                   <EditableTextArea
                     type="textarea"
@@ -128,22 +128,7 @@ const ItemTable = ({
             +
           </Button>
         ) : (
-          <Button
-            disabled
-            hidden
-            className="add"
-            style={{
-              fontSize: "22px",
-              backgroundColor: "lightgreen",
-              textAlign: "center",
-              margin: "8px",
-              padding: " 6px 16px",
-              margin: "8px",
-            }}
-            onClick={handleAdd}
-          >
-            +
-          </Button>
+          <div></div>
         )}
       </div>
     </>

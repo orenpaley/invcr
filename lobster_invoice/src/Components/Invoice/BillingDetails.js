@@ -1,10 +1,10 @@
 import EditableField, { EditableTextArea } from "../../helpers/EditableField";
-import { Label, Form } from "reactstrap";
+import { Label } from "reactstrap";
 
-const BillingDetails = ({ values, editMode, handleChange }) => {
+const BillingDetails = ({ values, editMode, handleChange, custom }) => {
   return (
     <>
-      <div style={{ marginTop: "20px" }}>
+      <div>
         <p className="invoice-sub-header">From</p>
         <Label for="name" hidden>
           Name
@@ -27,7 +27,7 @@ const BillingDetails = ({ values, editMode, handleChange }) => {
             <EditableTextArea
               type="textarea"
               name="address"
-              placeholder="address"
+              placeholder={"address line 1 \naddress line 2\naddress line 3"}
               value={values.address}
               onChange={handleChange}
               editMode={editMode}

@@ -16,10 +16,8 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
         }}
       >
         <thead>
-          <tr className="table-primary primary" scope="1" color="primary">
-            <th style={{ fontSize: "36px" }} colSpan={3}>
-              Invoice
-            </th>
+          <tr className="table">
+            <th style={{ fontSize: "36px", paddingLeft: "24px" }}>Invoice</th>
           </tr>
         </thead>
         <tbody>
@@ -66,6 +64,7 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
                 placeholder="February 1st, 2023"
                 type="date"
                 value={values.dueDate}
+                min={values.date}
                 onChange={handleChange}
                 editMode={editMode}
                 required

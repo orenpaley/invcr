@@ -8,7 +8,7 @@ export const initialValues = {
   clientAddress: "789 something park",
   clientCityStateZip: "Somewhere, TN, 67890",
   clientEmail: "jane@da.com",
-  code: "EX-001",
+  code: "",
   date: "2023-01-01",
   dueDate: "2023-02-01",
   items: [
