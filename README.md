@@ -1,5 +1,5 @@
 ## invcr
-#####A react + node full stack invoicing Application (Beta)
+#####A react + node full stack invoicing Application
 
 
 * database: **PosgreSql**
@@ -11,6 +11,14 @@
 * styling: **boostrap + reactstrap**
 
 
-Summary: A fully featured invoicing experience. Generic users can fill out an invoice and download it while logged in users have access to saving invoices, creating clients, generating client and billing details automatically, and emailing invoices. This project is still in beta. To report feedback email oren@invcr.io
+Summary: A fully featured interactive invoicing application. Generic users can fill out an invoice and download it while logged in users have access to save and email. 
 
-Thank you for your interest in this project. 
+####Saving and Managing Invoices
+####Saving and Managing Clients
+####auto generating redundant information for quicker experience
+####emailing invvoices to clients directly
+
+
+This project is still in beta. To report feedback email oren@invcr.io
+
+
