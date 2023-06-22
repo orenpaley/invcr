@@ -11,7 +11,8 @@
 * styling: **boostrap + reactstrap**
 
 
-Summary: A fully featured interactive invoicing application. Generic users can fill out an invoice and download it while logged in users have access to save and email. 
+#### Summary: 
+A fully featured interactive invoicing application. Generic users can fill out an invoice and download it while logged in users have access to save and email. 
 
 **key features for logged in users:**
 
@@ -23,5 +24,7 @@ Summary: A fully featured interactive invoicing application. Generic users can f
 
 
 This project is still in beta. To report feedback email oren@invcr.io
+
+
 
 
