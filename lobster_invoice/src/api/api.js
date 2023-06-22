@@ -17,6 +17,7 @@ class LobsterApi {
     // console.debug("API Call:", endpoint, data, method);
 
     const url = `${BASE_URL}/${endpoint}`;
+    console.log("url", url);
     const headers = {
       Authorization: `Bearer ${LobsterApi.token}`,
     };
