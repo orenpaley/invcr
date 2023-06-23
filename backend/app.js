@@ -17,12 +17,7 @@ const app = express();
 
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: "*", // Replace with your frontend domain
-    optionsSuccessStatus: 200, // Some legacy browsers (e.g., IE11) choke on 204
-  })
-);
+app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 //verifies a token if given
