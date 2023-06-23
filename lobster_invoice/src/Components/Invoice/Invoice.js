@@ -385,7 +385,7 @@ const Invoice = ({ data, clients = null }) => {
                     handleRemove={handleRemove}
                     getTotal={getTotal}
                   />
-                ) : (
+                ) : editMode ? (
                   <div className="row justify-content-center">
                     <Button
                       className="add"
@@ -403,6 +403,8 @@ const Invoice = ({ data, clients = null }) => {
                       +
                     </Button>
                   </div>
+                ) : (
+                  <div></div>
                 )}
               </div>
             </Row>
