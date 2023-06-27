@@ -81,18 +81,14 @@ router.get("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
  * Authorization required: admin or same-user-as-:email
  **/
 
-router.patch(
-  "/:email",
-  ensureCorrectUserOrAdmin,
-  async function (req, res, next) {
-    try {
-      const user = await User.update(req.params.email, req.body);
-      return res.json({ user });
-    } catch (err) {
-      return next(err);
-    }
+router.patch("/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const user = await User.update(req.params.id, req.body);
+    return res.json({ user });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** DELETE /[username]  =>  { deleted: username }
  *

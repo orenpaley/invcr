@@ -12,7 +12,6 @@ import ErrorPage from "../Components/ErrorPage";
 import SendMail from "../Components/Invoice/SendMail";
 import ClientInvoice from "../Components/ClientInvoice/ClientInvoice";
 import Profile from "../Components/Profile/Profile";
-import userContext from "../userContext";
 
 function LobsterRoutes() {
   return (

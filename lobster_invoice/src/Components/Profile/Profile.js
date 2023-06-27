@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FormGroup, Label, Input, Button } from "reactstrap";
-import { useLocation } from "react-router-dom";
 
-import { NavLink, Navigate } from "react-router-dom";
 import LobsterApi from "../../API/api";
 import { useNavigate } from "react-router-dom";
 import userContext from "../../userContext";
@@ -19,7 +17,6 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setProfile({ ...profile, [name]: value });
   };
 
