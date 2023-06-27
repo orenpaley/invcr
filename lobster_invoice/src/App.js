@@ -13,6 +13,7 @@ function App() {
   const [context, setContext] = useState(false);
   useEffect(() => {
     const getLoggedUser = async () => {
+      console.log("running app use effect");
       if (localStorage.getItem("curr")) {
         setContext(JSON.parse(localStorage.getItem("curr")));
       } else {
@@ -28,6 +29,17 @@ function App() {
       : null;
     LobsterApi.token = token;
   }, [context.token]);
+
+  useEffect(() => {
+    const unloadCallback = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+      return "";
+    };
+
+    window.addEventListener("beforeunload", unloadCallback);
+    return () => window.removeEventListener("beforeunload", unloadCallback);
+  }, []);
 
   return (
     <BrowserRouter>

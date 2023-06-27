@@ -1,5 +1,4 @@
-import React from "react";
-
+import React, { useState, useContext } from "react";
 import { Route, Routes, Navigate } from "react-router";
 
 import Home from "../Components/Home";
@@ -12,7 +11,8 @@ import Logout from "../Components/Logout";
 import ErrorPage from "../Components/ErrorPage";
 import SendMail from "../Components/Invoice/SendMail";
 import ClientInvoice from "../Components/ClientInvoice/ClientInvoice";
-import { useLocation } from "react-router-dom";
+import Profile from "../Components/Profile/Profile";
+import userContext from "../userContext";
 
 function LobsterRoutes() {
   return (
@@ -24,6 +24,7 @@ function LobsterRoutes() {
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/client" element={<Client />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/send" element={<SendMail />} />
         <Route
           path="/client-invoice/:userId/:invoiceId"

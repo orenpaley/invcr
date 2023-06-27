@@ -139,6 +139,16 @@ function Navigation() {
               </NavLink>
             </NavItem>
             <NavItem>
+              <NavLink
+                className={(isActive) =>
+                  "nav-link" + (!isActive ? " unselected" : "")
+                }
+                to="/profile"
+              >
+                Profile
+              </NavLink>
+            </NavItem>
+            <NavItem>
               <NavLink to="/logout">Logout</NavLink>
             </NavItem>
           </div>

@@ -14,7 +14,7 @@ function LoginForm({ handleChange }) {
 
   useEffect(() => {
     if (context.user) setIsLogged(true);
-  }, [context.user]);
+  }, [context.user, context.token]);
 
   useEffect(() => {
     navigateIfLogged();
