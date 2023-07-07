@@ -5,6 +5,8 @@ import { Button } from "reactstrap";
 import { useContext, useState } from "react";
 import userContext from "../../userContext";
 
+import "./Clients.css";
+
 function ClientForm({ clients, setClients }) {
   const navigate = useNavigate();
 
@@ -55,7 +57,7 @@ function ClientForm({ clients, setClients }) {
           <div className="valid-feedback">Looks good!</div>
         </div>
 
-        <div className="signup_input">
+        <div className="client_form">
           <label htmlFor="address" className="form-label">
             Address
           </label>
@@ -68,8 +70,12 @@ function ClientForm({ clients, setClients }) {
             required
           />
         </div>
-        <div className="signup_input">
-          <Button color="info" className="button regis-button">
+        <div style={{ margin: "auto", textAlign: "center" }}>
+          <Button
+            style={{ margin: "auto", textAlign: "center" }}
+            color="info"
+            className="button regis-button"
+          >
             Add Client
           </Button>
         </div>

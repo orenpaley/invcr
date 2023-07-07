@@ -92,7 +92,7 @@ const Clients = () => {
           ))}
         </tbody>
       </Table>
-      <div>
+      <div style={{ margin: "auto", textAlign: "center", marginTop: "12px" }}>
         <Button primary onClick={handleAdd}>
           Add Client
         </Button>
