@@ -15,11 +15,7 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
           minWidth: "330px",
         }}
       >
-        <thead>
-          <tr className="table">
-            <th style={{ fontSize: "36px", paddingLeft: "24px" }}>Invoice</th>
-          </tr>
-        </thead>
+        <thead></thead>
         <tbody>
           <tr>
             <th className="w-25" scope="row">

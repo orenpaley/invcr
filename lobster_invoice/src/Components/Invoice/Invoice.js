@@ -9,6 +9,7 @@ import ItemTable from "./ItemTable";
 import InvoiceDetails from "./InvoiceDetails";
 import BillingDetails from "./BillingDetails";
 import ClientDetails from "./ClientDetails";
+import Logo from "../Logo";
 import { useState, useContext } from "react";
 import { initialItem, initialValuesClear } from "./initialValues";
 import LobsterApi from "../../API/api";
@@ -50,8 +51,9 @@ const Invoice = ({ data, clients = null }) => {
     to: "",
     from: "noreply@invcr.io",
     subject: "INVCR Invoice Incoming",
-    html: `Click the link below to view the PDF preview:<br/><a href="http://localhost:3000/client-invoice/${user.id}/${values.id}">download</a>`,
+    html: `Click the link below to view the PDF preview:<br/><a href="http://data.invcr.io/client-invoice/${user.id}/${values.id}">download</a>`,
   });
+  const [imagePreview, setImagePreview] = useState("");
 
   useEffect(() => {
     if (context) {
@@ -237,44 +239,69 @@ const Invoice = ({ data, clients = null }) => {
   const generatePdf = () => {
     const doc = new jsPDF("p", "mm", "a4");
 
-    // Add the information for the person sending the invoice
+    // Add Invoice Title / Info
+    doc.setFontSize(14);
+    doc.setFont(undefined, "bold");
+    doc.text("Invoice", 90, 8);
+
+    // Filled background for title
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.2 }));
+    doc.setFillColor("#5e954b");
+    doc.rect(0, 0, 500, 12, "F");
+    doc.restoreGraphicsState();
+
+    let topY = 35;
+    let rightY = 35;
+    let topX = 110;
+
+    // Logo
+    doc.addImage(imagePreview, "png", 5, 20, 25, 15);
+
+    // Add user / From
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text(values.name, 20, 25);
+    doc.text(values.name, 20, 10 + topY);
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text(values.address, 20, 31);
+    {
+      values.address ? doc.text(values.address, 20, 16 + topY) : (topY -= 10);
+    }
+    doc.text(values.email, 20, 26 + topY);
 
     // Add the "Bill To" section
     doc.setFont(undefined, "bold");
-    doc.text("Bill To:", 20, 55);
+    doc.text("Bill To:", 20, 38 + topY);
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text(values.clientName, 20, 60);
+    doc.text(values.clientName, 20, 44 + topY);
     doc.setFont(undefined, "normal");
-    doc.text(values.clientAddress, 20, 65);
+    {
+      values.clientAddress
+        ? doc.text(values.clientAddress, 20, 50 + topY)
+        : (topY -= 12);
+    }
 
-    // Add Invoice Title / Info
-    doc.setFontSize(28);
-    doc.text("Invoice", 90, 15);
+    doc.text(values.clientEmail, 20, 60 + topY);
+
     // invoice #, date, due date
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    doc.text("Invoice Number:", 110, 55);
-    doc.text(values.code, 150, 55);
+    doc.text("Invoice Number:", topX + 15, 10 + rightY);
+    doc.text(values.code, topX + 50, 10 + rightY);
 
-    doc.text("Date:", 110, 63);
+    doc.text("Date:", topX + 15, 18 + rightY);
     doc.setFont(undefined, "normal");
-    doc.text(values.date, 150, 63);
+    doc.text(values.date, topX + 50, 18 + rightY);
 
-    doc.text("Due Date:", 110, 71);
+    doc.text("Due Date:", topX + 15, 26 + rightY);
     doc.setFont(undefined, "normal");
-    doc.text(values.dueDate, 150, 71);
+    doc.text(values.dueDate, topX + 50, 26 + rightY);
 
     const items = getItems();
 
     autoTable(doc, {
-      startY: 80,
+      startY: 80 + topY,
       head: [["Description", "Rate", "Quantity", "Total"]],
       body: [...items],
     });
@@ -282,14 +309,14 @@ const Invoice = ({ data, clients = null }) => {
 
     doc.setFont(undefined, "normal");
     doc.text("Subtotal:", 140, finalY + 10);
-    doc.text(String(subtotal), 170, finalY + 10);
+    doc.text("$" + String(subtotal), 170, finalY + 10);
 
     doc.text("Tax:", 140, finalY + 20);
-    doc.text(String(values.taxRate), 170, finalY + 20);
+    doc.text(String(values.taxRate * 100) + "%", 170, finalY + 20);
 
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
-    doc.text(String(values.total), 170, finalY + 30);
+    doc.text("$" + String(values.total), 170, finalY + 30);
 
     doc.text("Terms:", 20, finalY + 10);
     doc.text(String(values.terms), 20, finalY + 20);
@@ -314,15 +341,32 @@ const Invoice = ({ data, clients = null }) => {
         }}
       >
         <div className="invoice-form">
-          {/* <div className="form-row"> */}
-          {/* <div>
-            <Label for="exampleFile">File</Label>
-            <Input id="exampleFile" name="file" type="file" />
-            <FormText>Insert Your Logo (optional)</FormText>
-          </div> */}
-          {/* </div> */}
-
           <Container className="container-box">
+            <Row>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "4px",
+                }}
+              >
+                <Logo
+                  imagePreview={imagePreview}
+                  setImagePreview={setImagePreview}
+                  editMode={editMode}
+                />
+
+                <div
+                  style={{
+                    fontSize: "36px",
+                    alignSelf: "baseline",
+                    justifySelf: "baseline",
+                  }}
+                >
+                  Invoice
+                </div>
+              </div>
+            </Row>
             <Row>
               <Col sm="8">
                 <InvoiceDetails
