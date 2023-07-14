@@ -255,6 +255,7 @@ const Invoice = ({ data, clients = null }) => {
     let rightY = 35;
     let topX = 110;
 
+    console.log("IMAGE DATA FOR PDF --> ", imagePreview);
     // Logo
     doc.addImage(imagePreview, "png", 5, 20, 25, 15);
 
@@ -354,6 +355,8 @@ const Invoice = ({ data, clients = null }) => {
                   imagePreview={imagePreview}
                   setImagePreview={setImagePreview}
                   editMode={editMode}
+                  user={user}
+                  values={values}
                 />
 
                 <div

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Label, Input } from "reactstrap";
+import { Label, Input, Button } from "reactstrap";
+import LobsterApi from "../API/api";
 
-const Logo = ({ imagePreview, setImagePreview, editMode }) => {
+const Logo = ({ imagePreview, setImagePreview, editMode, user, values }) => {
   function previewImage(event) {
     const imgD = event.target.files[0];
-    console.log("imgD", imgD);
+
     const reader = new FileReader();
 
     // PREVIEW
@@ -25,7 +26,7 @@ const Logo = ({ imagePreview, setImagePreview, editMode }) => {
         // errorMessage.innerText = "";
 
         // CONVERTS FILE TO BASE 64
-        reader.readAsDataURL(imgD);
+        console.log("readasdataurl", reader.readAsDataURL(imgD));
       } else {
         // errorMessage.innerText = "File type should be an image";
         setImagePreview("");
@@ -37,6 +38,28 @@ const Logo = ({ imagePreview, setImagePreview, editMode }) => {
       // errorMessage.innerText = "Please select a picture";
     }
   }
+  // function handleSave() {
+  //   if (imagePreview) {
+  //     const reader = new FileReader();
+  //     reader.onload = function (event) {
+  //       const fileData = new Uint8Array(event.target.result);
+
+  //       // Convert to bytea format
+  //       const bytea =
+  //         "\\x" +
+  //         fileData.reduce(
+  //           (acc, byte) => acc + byte.toString(16).padStart(2, "0"),
+  //           ""
+  //         );
+
+  //       // Send the bytea data to the server for saving
+  //       LobsterApi.saveInvoice(user.id, { ...values, logo: bytea });
+  //     };
+
+  //     reader.readAsArrayBuffer(imagePreview);
+  //   }
+  // }
+
   if (editMode) {
     return (
       <>
@@ -53,6 +76,7 @@ const Logo = ({ imagePreview, setImagePreview, editMode }) => {
           {imagePreview !== "" && (
             <img src={imagePreview} alt="Preview" width="200px" />
           )}
+          {/* <Button onClick={handleSave}> Save Logo </Button> */}
         </div>
       </>
     );
