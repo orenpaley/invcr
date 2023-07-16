@@ -177,7 +177,10 @@ class Invoice {
                 name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
+                date, 
                 due_date AS "dueDate",
+                subtotal,
+                tax_rate AS "taxRate",
                 total, 
                 status
              FROM invoices
@@ -191,7 +194,11 @@ class Invoice {
                 name,
                 client_name AS "clientName",
                 created_at AS "createdAt",
+                date,
                 due_date AS "dueDate",
+                tax_rate AS "taxRate", 
+                subtotal, 
+                tax_rate AS "taxRate",
                 total, 
                 status
              FROM invoices
@@ -200,6 +207,19 @@ class Invoice {
     );
 
     const invoices = invoicesRes.rows;
+
+    for (let invoice of invoices) {
+      const itemQuery = `SELECT index,  user_id AS "userId", invoice_id AS "invoiceId",
+  description, rate, quantity
+FROM items
+WHERE user_id = $1 AND invoice_id = $2;`;
+      const items = await db.query(itemQuery, [userId, invoice.id]);
+
+      invoice.items = items.rows || [];
+
+      invoice.date = moment(invoice.date).format("YYYY-MM-DD");
+      invoice.dueDate = moment(invoice.dueDate).format("YYYY-MM-DD");
+    }
 
     if (!invoices) throw new NotFoundError(`No invoices found`);
 

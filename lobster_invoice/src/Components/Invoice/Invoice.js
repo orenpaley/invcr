@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 // import generatePdf from "./invoiceHelpers";
-
+import {
+  addCommas,
+  splitParagraph,
+  fitImageSize,
+} from "../../helpers/helpers.js";
 import SendMail from "./SendMail";
 import "./Invoice.css";
 import { jsPDF } from "jspdf";
@@ -53,7 +57,11 @@ const Invoice = ({ data, clients = null }) => {
     subject: "INVCR Invoice Incoming",
     html: `Click the link below to view the PDF preview:<br/><a href="http://data.invcr.io/client-invoice/${user.id}/${values.id}">download</a>`,
   });
-  const [imagePreview, setImagePreview] = useState("");
+  const [imagePreview, setImagePreview] = useState({
+    file: "",
+    previewURL: "",
+    dimensions: {},
+  });
 
   useEffect(() => {
     if (context) {
@@ -228,9 +236,10 @@ const Invoice = ({ data, clients = null }) => {
     items.forEach((item) => {
       let newItem = [];
       newItem[0] = item.description;
-      newItem[1] = item.rate;
+      newItem[1] = "$" + addCommas(item.rate);
       newItem[2] = item.quantity;
-      newItem[3] = +newItem[1] * +newItem[2];
+      newItem[3] = "$" + addCommas(item.rate * item.quantity);
+
       itemArr.push(newItem);
     });
     return itemArr;
@@ -242,7 +251,7 @@ const Invoice = ({ data, clients = null }) => {
     // Add Invoice Title / Info
     doc.setFontSize(14);
     doc.setFont(undefined, "bold");
-    doc.text("Invoice", 90, 8);
+    doc.text("Invoice", 93, 8);
 
     // Filled background for title
     doc.saveGraphicsState();
@@ -255,9 +264,23 @@ const Invoice = ({ data, clients = null }) => {
     let rightY = 35;
     let topX = 110;
 
-    console.log("IMAGE DATA FOR PDF --> ", imagePreview);
-    // Logo
-    doc.addImage(imagePreview, "png", 5, 20, 25, 15);
+    let newDimensions = fitImageSize(
+      imagePreview.dimensions.width,
+      imagePreview.dimensions.height,
+      40,
+      20
+    );
+
+    if (imagePreview.previewURL) {
+      doc.addImage(
+        imagePreview.previewURL,
+        "png",
+        5,
+        15,
+        newDimensions.width,
+        newDimensions.height
+      );
+    }
 
     // Add user / From
     doc.setFontSize(12);
@@ -310,20 +333,39 @@ const Invoice = ({ data, clients = null }) => {
 
     doc.setFont(undefined, "normal");
     doc.text("Subtotal:", 140, finalY + 10);
-    doc.text("$" + String(subtotal), 170, finalY + 10);
+    doc.text("$" + addCommas(subtotal), 170, finalY + 10);
 
     doc.text("Tax:", 140, finalY + 20);
-    doc.text(String(values.taxRate * 100) + "%", 170, finalY + 20);
+    doc.text(String((values.taxRate * 100).toFixed(2)) + "%", 170, finalY + 20);
 
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
-    doc.text("$" + String(values.total), 170, finalY + 30);
+    doc.text("$" + addCommas(values.total), 170, finalY + 30);
 
-    doc.text("Terms:", 20, finalY + 10);
-    doc.text(String(values.terms), 20, finalY + 20);
+    let init = 50;
 
-    doc.text("Notes:", 20, finalY + 40);
-    doc.text(String(values.notes), 20, finalY + 50);
+    doc.text("Terms:", 20, finalY + init);
+    doc.setFontSize(10);
+    doc.setFont(undefined, "normal");
+    let termLines = splitParagraph(values.terms, 60);
+    init += 5;
+    for (let line of termLines) {
+      doc.text(String(line), 20, finalY + init);
+      init += 5;
+    }
+
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(12);
+    init += 10;
+    doc.text("Notes:", 20, finalY + init);
+    doc.setFont(undefined, "normal");
+    doc.setFontSize(10);
+    let noteLines = splitParagraph(values.notes, 60);
+    init += 5;
+    for (let line of noteLines) {
+      doc.text(String(line), 20, finalY + init);
+      init += 5;
+    }
     doc.save("invoice.pdf");
   };
 
@@ -372,20 +414,12 @@ const Invoice = ({ data, clients = null }) => {
             </Row>
             <Row>
               <Col sm="8">
-                <InvoiceDetails
-                  values={values}
-                  editMode={editMode}
-                  handleChange={handleChange}
-                  user={user}
-                  className="invoice-field-box"
-                />
-              </Col>
-              <Col sm="4">
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
                     gap: "12px",
+                    marginLeft: "34px",
                   }}
                 >
                   {context.user ? (
@@ -418,6 +452,15 @@ const Invoice = ({ data, clients = null }) => {
                     className="invoice-field-box"
                   />
                 </div>
+              </Col>
+              <Col sm="4">
+                <InvoiceDetails
+                  values={values}
+                  editMode={editMode}
+                  handleChange={handleChange}
+                  user={user}
+                  className="invoice-field-box"
+                />
               </Col>
             </Row>
 
@@ -465,6 +508,7 @@ const Invoice = ({ data, clients = null }) => {
                   <EditableTextArea
                     id="terms"
                     name="terms"
+                    className="termsNotes"
                     placeholder="type terms here ex : net 30"
                     type="textarea"
                     value={values.terms}
@@ -479,7 +523,7 @@ const Invoice = ({ data, clients = null }) => {
                   <br></br>
                   <EditableTextArea
                     id="notes"
-                    className="textarea"
+                    className="textarea termsNotes"
                     name="notes"
                     placeholder="Thank you!"
                     type="textarea"

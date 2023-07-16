@@ -18,10 +18,8 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
         <thead></thead>
         <tbody>
           <tr>
-            <th className="w-25" scope="row">
-              Code
-            </th>
-            <td className="w-25">
+            <th scope="row">Code</th>
+            <td>
               <EditableField
                 name="code"
                 type="text"
@@ -32,11 +30,9 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
               />
             </td>
           </tr>
-          <tr className="w-25">
-            <th className="w-25" scope="row">
-              Date
-            </th>
-            <td className="w-25">
+          <tr>
+            <th scope="row">Date</th>
+            <td>
               <EditableField
                 id="date"
                 name="date"
@@ -49,11 +45,9 @@ const InvoiceDetails = ({ values, handleChange, editMode }) => {
               />
             </td>
           </tr>
-          <tr className="w-25">
-            <th className="w-25" scope="row">
-              Due Date
-            </th>
-            <td className="w-25">
+          <tr>
+            <th scope="row">Due Date</th>
+            <td>
               <EditableField
                 id="dueDate"
                 name="dueDate"

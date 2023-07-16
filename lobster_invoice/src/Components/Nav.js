@@ -33,7 +33,7 @@ function Navigation() {
               fontWeight: 600,
             }}
           >
-            INVCR
+            INVCR.io
           </NavLink>
           <div
             style={{
@@ -90,7 +90,7 @@ function Navigation() {
           }}
         >
           <NavLink
-            to="/"
+            to="/dashboard"
             className={(isActive) =>
               "invcr_logo nav-link" + (!isActive ? " unselected" : "")
             }
