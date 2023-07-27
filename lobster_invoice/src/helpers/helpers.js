@@ -1,3 +1,6 @@
+import React, { useRef } from "react";
+import { Button } from "reactstrap";
+
 export const addCommas = (number) => {
   let numSplit = String(number).split(".");
   let numRes = [];
@@ -88,4 +91,103 @@ export const fitImageSize = (width, height, maxWidth, maxHeight) => {
   }
 
   return { width: newWidth, height: newHeight };
+};
+
+export const throttle = (func, delay) => {
+  let timeoutId;
+  return function (...args) {
+    if (!timeoutId) {
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        timeoutId = null;
+      }, delay);
+    }
+  };
+};
+
+export const SquareScroll = ({
+  cards,
+  containerRef,
+  scrollLeft,
+  scrollRight,
+}) => {
+  return (
+    <div style={{ display: "flex", width: "100%" }}>
+      <div
+        style={{
+          backgroundColor: "white",
+          fontSize: "14px",
+          height: "24px",
+          alignSelf: "center",
+          position: "relative",
+        }}
+      >
+        <button
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "0",
+            transform: "translateY(-50%)",
+            zIndex: "3",
+            color: "green",
+            background: "white",
+            borderRadius: "50%",
+            opacity: ".9",
+            border: "none",
+            fontSize: "24px",
+            padding: "6px 12px",
+          }}
+          onClick={scrollLeft}
+        >
+          &#8592;
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          overflowX: "scroll",
+          width: "auto",
+          gap: "24px", // Set the desired width of the container
+          margin: "auto",
+          padding: "0 24px", // Add padding to the left and right sides
+          boxSizing: "border-box", // Include padding in the width calculation
+        }}
+        ref={containerRef}
+      >
+        {cards.map((card, index) => (
+          <React.Fragment key={index}>{card}</React.Fragment>
+        ))}
+        {/* You can use your own buttons or components for left and right scrolling */}
+      </div>
+
+      <div
+        style={{
+          fontSize: "14px",
+          height: "24px",
+          alignSelf: "center",
+          position: "relative",
+        }}
+      >
+        <Button
+          style={{
+            color: "green",
+            position: "absolute",
+            top: "50%",
+            right: "0",
+            transform: "translateY(-50%)",
+            background: "white",
+            borderRadius: "50%",
+            opacity: ".9",
+            border: "none",
+            fontSize: "24px",
+            padding: "6px 12px",
+          }}
+          onClick={scrollRight}
+        >
+          →
+        </Button>
+      </div>
+    </div>
+  );
 };

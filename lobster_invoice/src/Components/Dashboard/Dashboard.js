@@ -62,7 +62,7 @@ const Dashboard = () => {
           {activeInvoice ? (
             <div>
               {
-                <div className="client-invoice">
+                <div className="client-invoice-dash">
                   <div className="topcontainer">
                     <div className="subcontainer header">
                       <div className="dashboard_top_row">

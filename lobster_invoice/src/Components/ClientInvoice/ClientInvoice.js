@@ -186,7 +186,7 @@ const ClientInvoice = ({ url }) => {
               </div>
               <div className="footer">
                 <p>Subtotal: ${subtotal}</p>
-                <p>Tax : ${values.taxRate}</p>
+                <p>Tax : {values.taxRate}%</p>
                 <p>Total: ${values.total}</p>
               </div>
               <div className="terms">

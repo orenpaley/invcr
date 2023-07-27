@@ -2,31 +2,52 @@
 display: flex;
 gap: 24px;
 padding: 0;
-width: 300px;
-min-width: 300px;
-
 
 }
 
 .invoice-list-container {
   border: 2px black solid;
   padding: 0;
-  width: 300px;
-  min-width: 300px;
-
 
 }
 
-.invoice-details-container {
-  border: 2px black solid;
-  padding: 24px;
-  min-width: 776px;
+.flex-top-row-dark {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-top: 12px;
+
 }
 
+.client-invoice-dash {
+  /* background-color: aliceblue ;
+width: 100%;
+  margin: auto; */
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  
+}
+
+.client-invoice {
+  width: 100%;
+}
 
 .active {
-  background-color: pink;
+  border: lightgreen 1px solid !important;
+
+
 }
+/* 
+.active-card{
+
+  border: lightgreen 1px solid !important;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  z-index: 1;
+} */
 
 .dashboard_top_row {
   display: flex;
@@ -35,8 +56,67 @@ min-width: 300px;
 }
 
 .dash_status {
-  background-color: yellow;
-  font-size: 36px;
+  font-size: 14px;
   padding: 12px 36px;
   border-radius: 24px;
+}
+
+.paid {
+  color: lightgreen
+}
+
+.bg-paid {
+  background-color: lightgreen;
+}
+
+.created {
+  color: lightblue
+}
+
+.bg-created {
+  background-color: lightblue;
+}
+
+.sent {
+  color: lightyellow
+}
+
+.bg-sent {
+  background-color: lightyellow;
+}
+
+.overdue {
+  color: tomato
+}
+
+.bg-overdue {
+  background-color: tomato;
+}
+
+.dash-open-btn {
+  background-color: aquamarine !important;
+  color: darkblue !important;
+}
+
+.custom-select {
+  background-color: inherit;
+}
+
+.items {
+  max-width: 80%;
+  font-size: 14px;
+
+}
+
+.table {
+  max-width: 80%;
+  margin: auto;
+}
+
+.flex-container-info-row {
+  flex-direction: row;
+  display: flex;
+  justify-content: space-around;
+  gap: 48px;
+
 }

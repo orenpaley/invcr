@@ -49,6 +49,7 @@ const Invoice = ({ data, clients = null }) => {
   const [context, setContext] = useContext(userContext);
   const [user, setUser] = useState(context.user || {});
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [editMode, setEditMode] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [msg, setMsg] = useState({
@@ -61,6 +62,22 @@ const Invoice = ({ data, clients = null }) => {
     file: "",
     previewURL: "",
     dimensions: {},
+  });
+
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        setSuccess(null);
+      }, 4500);
+    }
+  });
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 4500);
+    }
   });
 
   useEffect(() => {
@@ -159,6 +176,7 @@ const Invoice = ({ data, clients = null }) => {
           if (isInvoice) {
             try {
               await LobsterApi.patchInvoice(user.id, values.id, values);
+              setSuccess("invoice saved!");
             } catch (error) {
               setError("Failed to update invoice. Please try again.");
               // Set the error message
@@ -168,6 +186,7 @@ const Invoice = ({ data, clients = null }) => {
             try {
               const saved = await LobsterApi.saveInvoice(user.id, values);
               if (!values) setValues(saved);
+              setSuccess("new invoice saved!!");
             } catch (error) {
               setError("something went wrong");
             }
@@ -181,7 +200,7 @@ const Invoice = ({ data, clients = null }) => {
   const handleNew = (e) => {
     e.preventDefault();
     if (user.id) handleSave(e);
-
+    setSuccess("previous invoiced saved, work on new invoice worry free");
     setValues({ ...initialValuesClear, id: null });
   };
 
@@ -246,19 +265,20 @@ const Invoice = ({ data, clients = null }) => {
   };
 
   const generatePdf = () => {
+    console.log("invoice values on generate", values);
     const doc = new jsPDF("p", "mm", "a4");
 
     // Add Invoice Title / Info
-    doc.setFontSize(14);
-    doc.setFont(undefined, "bold");
-    doc.text("Invoice", 93, 8);
+    // doc.setFontSize(14);
+    // doc.setFont(undefined, "bold");
+    // doc.text("Invoice", 93, 8);
 
     // Filled background for title
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({ opacity: 0.2 }));
-    doc.setFillColor("#5e954b");
-    doc.rect(0, 0, 500, 12, "F");
-    doc.restoreGraphicsState();
+    // doc.saveGraphicsState();
+    // doc.setGState(new doc.GState({ opacity: 0.2 }));
+    // doc.setFillColor("#5e954b");
+    // doc.rect(0, 0, 500, 12, "F");
+    // doc.restoreGraphicsState();
 
     let topY = 35;
     let rightY = 35;
@@ -291,7 +311,10 @@ const Invoice = ({ data, clients = null }) => {
     {
       values.address ? doc.text(values.address, 20, 16 + topY) : (topY -= 10);
     }
-    doc.text(values.email, 20, 26 + topY);
+
+    {
+      values.email ? doc.text(values.email, 20, 26 + topY) : (topY -= 10);
+    }
 
     // Add the "Bill To" section
     doc.setFont(undefined, "bold");
@@ -347,11 +370,14 @@ const Invoice = ({ data, clients = null }) => {
     doc.text("Terms:", 20, finalY + init);
     doc.setFontSize(10);
     doc.setFont(undefined, "normal");
-    let termLines = splitParagraph(values.terms, 60);
+
+    let termLines = splitParagraph(values.terms, 60) || [];
     init += 5;
     for (let line of termLines) {
-      doc.text(String(line), 20, finalY + init);
-      init += 5;
+      if (line.length > 0) {
+        doc.text(String(line), 20, finalY + init);
+        init += 5;
+      }
     }
 
     doc.setFont(undefined, "bold");
@@ -360,7 +386,7 @@ const Invoice = ({ data, clients = null }) => {
     doc.text("Notes:", 20, finalY + init);
     doc.setFont(undefined, "normal");
     doc.setFontSize(10);
-    let noteLines = splitParagraph(values.notes, 60);
+    let noteLines = splitParagraph(values.notes, 60) || [];
     init += 5;
     for (let line of noteLines) {
       doc.text(String(line), 20, finalY + init);
@@ -371,8 +397,12 @@ const Invoice = ({ data, clients = null }) => {
 
   return (
     <>
-      <div className="error-msg">
-        {error && <div className="errorMsg warning">{error}</div>}
+      <div>
+        <div className="error-msg">
+          {error && <div className="errorMsg warning">{error}</div>}
+          {success && <div className="successMsg success">{success}</div>}
+        </div>
+        <div className="success-msg"></div>
       </div>
 
       <div

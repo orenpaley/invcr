@@ -31,6 +31,12 @@
 //   taxRate: 0.11,
 // };
 
+export const initialItem = {
+  description: "",
+  quantity: "Qty",
+  rate: "Rate",
+};
+
 export const initialValuesClear = {
   name: "",
   address: "",
@@ -41,14 +47,8 @@ export const initialValuesClear = {
   code: "",
   date: "",
   dueDate: "",
-  items: [],
+  items: [initialItem],
   terms: "",
   notes: "",
   taxRate: 0,
-};
-
-export const initialItem = {
-  description: "",
-  quantity: "Qty",
-  rate: "Rate",
 };

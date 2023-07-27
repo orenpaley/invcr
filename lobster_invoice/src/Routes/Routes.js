@@ -13,6 +13,7 @@ import SendMail from "../Components/Invoice/SendMail";
 import ClientInvoice from "../Components/ClientInvoice/ClientInvoice";
 import Profile from "../Components/Profile/Profile";
 import Dashboard from "../Components/Dashboard/Dashboard";
+import DashboardTwo from "../Components/Dashboard/DashboardTwo";
 function LobsterRoutes() {
   return (
     <div>
@@ -20,7 +21,7 @@ function LobsterRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/invoices" element={<Invoices />} />
+        <Route path="/dashboard" element={<DashboardTwo />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/client" element={<Client />} />
         <Route path="/profile" element={<Profile />} />
@@ -29,7 +30,7 @@ function LobsterRoutes() {
           path="/client-invoice/:userId/:invoiceId"
           element={<ClientInvoice url={window.location.pathname} />}
         />
-        <Route path="/dashboard" element={<Dashboard />} />
+
         <Route path="/logout" element={<Logout />} />
         <Route path="/error-page" element={<ErrorPage />} />
         <Route path="/redirect" element={<Navigate to="/error-page" />} />

@@ -19,7 +19,7 @@ p {
 
 }
 
-.error-msg {
+.error-msg, success-msg {
   height: 24px;
   margin:auto;
 }
@@ -185,8 +185,6 @@ form {
 .remove {
   padding: 16px !important;
   vertical-align: middle;
-  
-
 }
 
 .remove:hover {
@@ -196,6 +194,13 @@ form {
 
 .errorMsg {
   background-color: rgb(240, 94, 94);
+  text-align: center;
+  font-weight: bold;
+  color: white
+}
+
+.successMsg {
+  background-color: rgb(128, 249, 158);
   text-align: center;
   font-weight: bold;
   color: white

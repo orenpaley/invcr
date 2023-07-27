@@ -90,7 +90,7 @@ function Navigation() {
           }}
         >
           <NavLink
-            to="/dashboard"
+            to="/"
             className={(isActive) =>
               "invcr_logo nav-link" + (!isActive ? " unselected" : "")
             }
@@ -100,7 +100,7 @@ function Navigation() {
               fontWeight: 600,
             }}
           >
-            INVCR
+            INVCR.io
           </NavLink>
 
           <div
@@ -123,9 +123,9 @@ function Navigation() {
                 className={(isActive) =>
                   "nav-link" + (!isActive ? " unselected" : "")
                 }
-                to="/invoices"
+                to="/dashboard"
               >
-                Invoices
+                Dashboard
               </NavLink>
             </NavItem>
             <NavItem>
