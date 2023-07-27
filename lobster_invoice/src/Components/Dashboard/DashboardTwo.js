@@ -477,7 +477,7 @@ const DashboardTwo = () => {
                           </tr>
                         </thead>
                         <tbody style={{ fontSize: "11px" }}>
-                          {activeInvoice ? (
+                          {activeInvoice.items ? (
                             activeInvoice.items.map((item, index) => (
                               <tr key={index}>
                                 <td>{item.description}</td>
