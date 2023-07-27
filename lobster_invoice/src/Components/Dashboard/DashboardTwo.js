@@ -477,7 +477,7 @@ const DashboardTwo = () => {
                           </tr>
                         </thead>
                         <tbody style={{ fontSize: "11px" }}>
-                          {activeInvoice ? (
+                          {activeInvoice.items ? (
                             activeInvoice.items.map((item, index) => (
                               <tr key={index}>
                                 <td>{item.description}</td>
@@ -496,10 +496,12 @@ const DashboardTwo = () => {
                       <p>
                         Subtotal: $
                         {activeInvoice.items
-                          .reduce((a, item) => {
-                            return (a += item.rate * item.quantity);
-                          }, 0)
-                          .toFixed(2)}
+                          ? activeInvoice.items
+                              .reduce((a, item) => {
+                                return (a += item.rate * item.quantity);
+                              }, 0)
+                              .toFixed(2)
+                          : 0}
                       </p>
                       <p>Tax : {(activeInvoice.taxRate * 100).toFixed(2)}%</p>
                       <p>Total: ${activeInvoice.total}</p>
