@@ -37,6 +37,7 @@ const DashboardTwo = () => {
     try {
       const fetched = await LobsterApi.getInvoices(user.id);
       setInvoices(fetched);
+      console.log("fetched invoices", fetched);
 
       // Sort the invoices based on the selected option and sort order
       const sorted = sortInvoices(selectedOption, codeSortOrder, fetched);
@@ -95,6 +96,7 @@ const DashboardTwo = () => {
 
     // Update the sortedInvoices state with the sorted array
     setSortedInvoices(sorted);
+    console.log("sorted invoices", sortedInvoices);
   };
 
   const handleStatusChange = async (e) => {
@@ -169,6 +171,7 @@ const DashboardTwo = () => {
 
   const handleInvoiceClick = (invoice) => {
     setActiveInvoice(invoice);
+    console.log("active invoice", activeInvoice);
   };
   const [leftDivWidth, setLeftDivWidth] = useState("50%");
   const [isDragging, setIsDragging] = useState(false);

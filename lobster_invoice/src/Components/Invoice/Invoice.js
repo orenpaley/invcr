@@ -100,7 +100,7 @@ const Invoice = ({ data, clients = null }) => {
   }, [values]);
 
   useEffect(() => {
-    let newTotal = subtotal * Math.min(+values.taxRate, 1) + subtotal;
+    let newTotal = subtotal * Math.min(+values.taxRate / 100, 100) + subtotal;
     setTotal(newTotal.toFixed(2));
     values.total = newTotal;
   }, [subtotal, values.taxRate]);
@@ -359,7 +359,7 @@ const Invoice = ({ data, clients = null }) => {
     doc.text("$" + addCommas(subtotal), 170, finalY + 10);
 
     doc.text("Tax:", 140, finalY + 20);
-    doc.text(String((values.taxRate * 100).toFixed(2)) + "%", 170, finalY + 20);
+    doc.text(String(Number(values.taxRate)) + "%", 170, finalY + 20);
 
     doc.setFont(undefined, "bold");
     doc.text("Total:", 140, finalY + 30);
@@ -579,19 +579,14 @@ const Invoice = ({ data, clients = null }) => {
                     id="taxRate"
                     name="taxRate"
                     type="number"
-                    value={
-                      values.taxRate > 1
-                        ? 1
-                        : values.taxRate < 0
-                        ? 0
-                        : values.taxRate
-                    }
+                    value={values.taxRate}
                     step={0.01}
                     min={0}
-                    max={1}
+                    max={100}
                     onChange={handleChange}
                     editMode={editMode}
                   />
+                  <span>%</span>
                 </div>
                 <div className="group">
                   <strong>

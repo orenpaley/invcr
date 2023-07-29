@@ -10,6 +10,8 @@ const ItemTable = ({
   handleRemove,
   getTotal,
 }) => {
+  let numPattern = /([0-9])+/;
+
   return (
     <>
       <Table
@@ -46,26 +48,30 @@ const ItemTable = ({
                 </td>
                 <td>
                   <EditableField
-                    type="number"
-                    pattern="[0-9]"
+                    type="text"
                     placeholder="quantity"
                     name="quantity"
-                    value={Number(item.quantity)}
+                    pattern={/[0-9][.]{1}[0-9]||[0-9]/}
+                    value={item.quantity}
                     onChange={(value) => handleItemChange(i, "quantity", value)}
                     editMode={editMode}
                     min={0}
+                    max={Infinity}
+                    step={0.01}
                   />
                 </td>
                 <td>
                   <EditableField
-                    type="number"
-                    pattern="[0-9]"
+                    type="text"
                     placeholder="rate"
+                    pattern={/[0-9][.]{1}[0-9]||[0-9]/}
                     name="rate"
-                    value={Number(item.rate)}
+                    value={item.rate}
                     onChange={(value) => handleItemChange(i, "rate", value)}
                     editMode={editMode}
                     min={0}
+                    max={Infinity}
+                    step={0.01}
                   />
                 </td>
                 <td>

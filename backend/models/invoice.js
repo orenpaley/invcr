@@ -192,13 +192,16 @@ class Invoice {
               user_id AS "userId",
                 code,
                 name,
+                address, 
+                email,
                 client_name AS "clientName",
+                client_address AS "clientAddress", 
+                client_email AS "clientEmail",
                 created_at AS "createdAt",
                 date,
                 due_date AS "dueDate",
                 tax_rate AS "taxRate", 
                 subtotal, 
-                tax_rate AS "taxRate",
                 total, 
                 status
              FROM invoices

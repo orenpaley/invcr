@@ -217,7 +217,9 @@ button {
 
 
 #taxRate {
-  max-width: 48px !important;
+  width: 70px !important;
+  min-width: fit-content;
+
   text-align: right;
 }
 

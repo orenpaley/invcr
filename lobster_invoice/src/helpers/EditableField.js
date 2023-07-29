@@ -13,17 +13,16 @@ const EditableField = ({
   min,
   max,
   step,
+  pattern,
 }) => {
   if (editMode) {
-    if (name === "taxRate") {
-    }
     return (
       <input
         id={id}
         placeholder={placeholder}
         name={name}
         className={className}
-        onChange={onChange}
+        onChange={(event) => onChange(event)}
         type={type}
         value={value}
         min={min}
