@@ -17,7 +17,6 @@ class LobsterApi {
     console.debug("API Call:", BASE_URL, endpoint, data, method);
 
     const url = `${BASE_URL}/${endpoint}`;
-    console.log("url", url);
     const headers = {
       Authorization: `Bearer ${LobsterApi.token}`,
     };
@@ -150,6 +149,15 @@ class LobsterApi {
 
   /* Send Email 
       msg = {*/
+  static async send(userId, invoiceId, msg) {
+    let res = await this.request(
+      `invoices/${userId}/${invoiceId}/send`,
+      msg,
+      "post"
+    );
+    return res;
+  }
+
   static async send(userId, invoiceId, msg) {
     let res = await this.request(
       `invoices/${userId}/${invoiceId}/send`,

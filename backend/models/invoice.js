@@ -33,7 +33,7 @@ class Invoice {
       taxRate,
       subtotal,
       total,
-      status,
+      status = "created",
     }
   ) {
     const duplicateCheck = await db.query(

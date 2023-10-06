@@ -154,7 +154,11 @@ const DashboardTwo = () => {
     };
 
     for (let invoice of invoices) {
-      newStatusToAmount[invoice.status.toLowerCase()] += Number(invoice.total);
+      if (invoice.status && invoice.status !== null) {
+        newStatusToAmount[invoice.status.toLowerCase()] += Number(
+          invoice.total
+        );
+      }
     }
 
     // Update the statusToAmount state with the new values

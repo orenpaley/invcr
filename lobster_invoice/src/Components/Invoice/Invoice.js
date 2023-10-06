@@ -56,7 +56,7 @@ const Invoice = ({ data, clients = null }) => {
     to: "",
     from: "noreply@invcr.io",
     subject: "INVCR Invoice Incoming",
-    html: `Click the link below to view the PDF preview:<br/><a href="http://data.invcr.io/client-invoice/${user.id}/${values.id}">download</a>`,
+    html: `Click the link below to view the PDF preview:<br/><a href="https://invcr.io/client-invoice/${user.id}/${values.id}">download</a>`,
   });
   const [imagePreview, setImagePreview] = useState({
     file: "",
@@ -184,8 +184,12 @@ const Invoice = ({ data, clients = null }) => {
           }
           if (!isInvoice) {
             try {
+              if (values) values.status = "created";
               const saved = await LobsterApi.saveInvoice(user.id, values);
-              if (!values) setValues(saved);
+              if (!values) {
+                saved.status = "created";
+                setValues(saved);
+              }
               setSuccess("new invoice saved!!");
             } catch (error) {
               setError("something went wrong");
