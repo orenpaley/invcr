@@ -118,7 +118,7 @@ function Navigation() {
               fontSize: "16px !important",
             }}
           >
-            <NavItem>
+            {/* <NavItem>
               <NavLink
                 className={(isActive) =>
                   "nav-link" + (!isActive ? " unselected" : "")
@@ -150,7 +150,7 @@ function Navigation() {
             </NavItem>
             <NavItem>
               <NavLink to="/logout">Logout</NavLink>
-            </NavItem>
+            </NavItem> */}
           </div>
         </div>
       </Nav>
