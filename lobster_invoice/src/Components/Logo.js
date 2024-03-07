@@ -30,9 +30,7 @@ const Logo = ({ imagePreview, setImagePreview, editMode }) => {
   };
 
   return (
-    <div
-      style={{ border: "1px black dashed", padding: "6px", marginLeft: "0px" }}
-    >
+    <div className="logo-importer">
       {editMode ? (
         <div>
           <p>

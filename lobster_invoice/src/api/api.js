@@ -14,8 +14,6 @@ class LobsterApi {
   static token;
 
   static async request(endpoint, data = {}, method = "get") {
-    console.debug("API Call:", BASE_URL, endpoint, data, method);
-
     const url = `${BASE_URL}/${endpoint}`;
     const headers = {
       Authorization: `Bearer ${LobsterApi.token}`,

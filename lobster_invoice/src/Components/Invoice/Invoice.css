@@ -1,23 +1,71 @@
 p {
-  font-size: 14px !important;
+  font-size: 1em !important;
 }
- .container {
-  padding: 9px 27px 14px 20px !important;
+
+.invoice-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  width: auto
 }
- 
+
+ .container-box {
+  padding: 1em 3em  2em 3em ;
+}
 
 .invoice-form {
-  border: 1px solid black;
-  min-width: 15px;
-  width: 900px;
+  border: .1em solid black;
+  min-width: 2em;
+  width: 60em;
   height: auto;
-  margin: 0;
   background-color: rgba(94, 149, 75, 0.16);
-  border-radius: 24px;
+  border-radius: 3em;
+  margin-bottom: 3em;
+}
 
 
+.invoice-container-row-one {
+  display: flex;
+  justify-content: space-between;
+}
+
+.invoice-header {
+  font-size: 2em;
+  align-self: baseline;
+  flex-grow: 5;
+}
+
+.logo-importer {
+  border: 1px black dashed;
+  padding: 6px; 
+  margin-left: 0px;
+}
+
+.invoice-container-row-two {
 
 }
+
+.invoice-form-from-to {
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-container-row-three {
+  margin: auto;
+  margin-top: 2em;
+  min-width: none;
+
+}
+
+.invoice-container-row-three-edit-mode {
+  font-size: 3em;
+  text-align: center;
+  margin: 1em;
+  padding: 1em 2em;
+  margin: 2em;
+  min-width: 0;
+}
+
 
 .error-msg, success-msg {
   height: 24px;
@@ -30,8 +78,6 @@ p {
   border: 0 !important;
   background-color: #FFE2E2 !important;
 }
-
-
 
 .form-row {
   width: 60%;
@@ -156,7 +202,7 @@ label {
 }
 
 .itemTable input {
-  width: 60px;
+  max-width: 60px;
 }
 
 
@@ -167,20 +213,15 @@ form {
   padding: 25px;
 }
 
-
 .add {
-  font-size: 22px;
-  background-color: lightgreen;
+  min-width: none;
+  width: 8em;
+  font-size: 1em;
+  background-color: #198754 !important;
   text-align: center;
-  margin: 8px;
-  padding: 6px 16px;
-
+  margin: auto;
+  padding: 2em;
 }
-
-.add:hover {
-  background-color: green !important;
-}
-
 
 .remove {
   padding: 16px !important;
@@ -213,6 +254,7 @@ p {
 button {
   padding: 0;
   margin: 0;
+  min-width: none !important;
 }
 
 
@@ -240,5 +282,61 @@ button {
 
 .termsNotes {
   width: 306px !important;
-  
+}
+
+.sidebar-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3em;
+  margin-top: 4em;
+  background-color: whitesmoke;
+  border-radius: 3em;
+  padding: 1em
+}
+
+.sidebar-button-group > *
+ {
+  font-size: 2em !important;
+ }
+/* Mobile styles */
+@media (max-width: 768px) {
+  .invoice-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: auto;
+    margin-left: .4em;
+    margin-right: .4em;
+    text-align: center;
+  }
+  .invoice-form {
+    /* Styles specific to mobile screens */
+    max-width: 20em !important;
+    padding: 1em;
+  }
+  .sidebar-button-group {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 3em;
+    margin-top: 4em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .invoice-container-row-one {
+    flex-direction: column;
+  }
+  .invoice-header {
+    text-align: center;
+  }
+
+  .logo-importer {
+    text-align: center;
+  }
+
+
 }

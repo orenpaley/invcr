@@ -47,7 +47,7 @@
 .signup_input input, .signup_input textarea {
   background-color: #FFE2E2;
   border-radius: 6px;
-  min-width: 200px;
+  width: 200px;
   /* margin-left: 24px !important; */
 }
 

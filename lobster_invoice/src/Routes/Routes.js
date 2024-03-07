@@ -19,7 +19,7 @@ function LobsterRoutes() {
     <div>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+        {/* <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<DashboardTwo />} />
         <Route path="/clients" element={<Clients />} />
@@ -31,7 +31,7 @@ function LobsterRoutes() {
           element={<ClientInvoice url={window.location.pathname} />}
         />
 
-        <Route path="/logout" element={<Logout />} />
+        <Route path="/logout" element={<Logout />} /> */}
         <Route path="/error-page" element={<ErrorPage />} />
         <Route path="/redirect" element={<Navigate to="/error-page" />} />
         <Route path="*" element={<p>There's nothing here: 404!</p>} />

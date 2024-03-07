@@ -19,17 +19,7 @@ import { initialItem, initialValuesClear } from "./initialValues";
 import LobsterApi from "../../API/api";
 import userContext from "../../userContext";
 
-import {
-  FormGroup,
-  Container,
-  Row,
-  Col,
-  Table,
-  Form,
-  Label,
-  Button,
-  Input,
-} from "reactstrap";
+import { Container, Row, Col, Label, Button } from "reactstrap";
 
 import EditableField, { EditableTextArea } from "../../helpers/EditableField";
 
@@ -409,53 +399,64 @@ const Invoice = ({ data, clients = null }) => {
         <div className="success-msg"></div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          flexDirection: "row",
-          width: "auto",
-        }}
-      >
+      <div className="invoice-container">
+        <div className="sidebar-button-group">
+          <RiAddLine onClick={handleNew} style={{ fontSize: "24px" }} />
+          <BiDownload onClick={generatePdf} style={{ fontSize: "24px" }} />
+          {/* <Button className="btn btn-info downloadBtn" >
+            Download
+          </Button> */}
+          <FaSave
+            onClick={user ? handleSave : setError("log in to save")}
+            style={{ fontSize: "2.5em" }}
+          />
+          {editMode ? (
+            <RiEditBoxFill
+              onClick={handleToggleEditMode}
+              style={{ fontSize: "2em" }}
+            />
+          ) : (
+            <RiEditBoxLine
+              onClick={handleToggleEditMode}
+              style={{ fontSize: "2em" }}
+            />
+          )}
+          {user.id ? (
+            <>
+              <RiMailSendLine
+                onClick={handleOpen}
+                style={{ fontSize: "2em" }}
+              />
+              <SendMail
+                showModal={showModal}
+                handleClose={handleClose}
+                id={user.id}
+                msg={msg}
+                invoiceId={values.id}
+                clientEmail={values.clientEmail}
+              />
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
+
         <div className="invoice-form">
           <Container className="container-box">
-            <Row>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "4px",
-                }}
-              >
-                <Logo
-                  imagePreview={imagePreview}
-                  setImagePreview={setImagePreview}
-                  editMode={editMode}
-                  user={user}
-                  values={values}
-                />
-
-                <div
-                  style={{
-                    fontSize: "36px",
-                    alignSelf: "baseline",
-                    justifySelf: "baseline",
-                  }}
-                >
-                  Invoice
-                </div>
-              </div>
+            <Row className="invoice-container-row-one">
+              <div className="invoice-header">Invoice</div>
+              <Logo
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                editMode={editMode}
+                user={user}
+                values={values}
+                className="logo-importer"
+              />
             </Row>
-            <Row>
+            <Row className="invoice-container-row-two">
               <Col sm="8">
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                    marginLeft: "34px",
-                  }}
-                >
+                <div className="invoice-form-from-to">
                   {context.user ? (
                     <span>
                       <Button
@@ -498,39 +499,27 @@ const Invoice = ({ data, clients = null }) => {
               </Col>
             </Row>
 
-            <Row className="row justify-content-center">
-              <div style={{ margin: "auto", marginTop: "24px" }}>
-                {values.items.length > 0 ? (
-                  <ItemTable
-                    values={values}
-                    editMode={editMode}
-                    handleItemChange={handleItemChange}
-                    handleAdd={handleAdd}
-                    handleRemove={handleRemove}
-                    getTotal={getTotal}
-                  />
-                ) : editMode ? (
-                  <div className="row justify-content-center">
-                    <Button
-                      className="add"
-                      style={{
-                        fontSize: "22px",
-                        backgroundColor: "#198754",
-                        textAlign: "center",
-                        margin: "8px",
-                        padding: "6px 16px",
-                        margin: "8px",
-                        minWidth: "300px",
-                      }}
-                      onClick={handleAdd}
-                    >
-                      +
-                    </Button>
-                  </div>
-                ) : (
-                  <div></div>
-                )}
-              </div>
+            <Row className="invoice-container-row-three">
+              {values.items.length > 0 ? (
+                <ItemTable
+                  values={values}
+                  editMode={editMode}
+                  handleItemChange={handleItemChange}
+                  handleAdd={handleAdd}
+                  handleRemove={handleRemove}
+                  getTotal={getTotal}
+                />
+              ) : editMode ? (
+                <button
+                  className="add"
+                  onClick={handleAdd}
+                  style={{ minWidth: "none !important" }}
+                >
+                  +
+                </button>
+              ) : (
+                <div></div>
+              )}
             </Row>
             <Row>
               <Col sm="8">
@@ -604,71 +593,7 @@ const Invoice = ({ data, clients = null }) => {
             </Row>
           </Container>
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            marginLeft: "36px",
-          }}
-        >
-          <RiAddLine onClick={handleNew} style={{ fontSize: "24px" }} />
-          <BiDownload onClick={generatePdf} style={{ fontSize: "24px" }} />
-          {/* <Button className="btn btn-info downloadBtn" >
-            Download
-          </Button> */}
-          <FaSave
-            onClick={user ? handleSave : setError("log in to save")}
-            style={{ fontSize: "24px" }}
-          />
-          {/* <Button className="btn btn-warning saveBtn" onClick={handleSave}>
-            Save
-          </Button> */}
-          {/* <Button className="btn btn-secondary saveBtn" onClick={handleClear}>
-            Clear
-          </Button> */}
-
-          {editMode ? (
-            <RiEditBoxFill
-              onClick={handleToggleEditMode}
-              style={{ fontSize: "24px" }}
-            />
-          ) : (
-            <RiEditBoxLine
-              onClick={handleToggleEditMode}
-              style={{ fontSize: "24px" }}
-            />
-          )}
-          {/* <Button
-            className="btn btn-success saveBtn"
-            onClick={handleToggleEditMode}
-          >
-            View/Edit
-          </Button> */}
-          {user.id ? (
-            <>
-              {/* <button className="btn btn-primary" onClick={handleOpen}>
-                Send
-              </button> */}
-              <RiMailSendLine
-                onClick={handleOpen}
-                style={{ fontSize: "24px" }}
-              />
-              <SendMail
-                showModal={showModal}
-                handleClose={handleClose}
-                id={user.id}
-                msg={msg}
-                invoiceId={values.id}
-                clientEmail={values.clientEmail}
-              />
-            </>
-          ) : (
-            <></>
-          )}
-        </div>
       </div>
-      {/* </div> */}
     </>
   );
 };
